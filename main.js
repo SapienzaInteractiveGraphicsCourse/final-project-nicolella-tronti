@@ -1,41 +1,62 @@
-import * as THREE from './threejs/build/three.module.js';
-import { GLTFLoader } from './threejs/examples/jsm/loaders/GLTFLoader.js';
-    // Scene setup
-    const models = {
-        crash:    { url: './assets/crash_bandicoot.glb' }
-    };
-    loadModels();
-    function loadModels() {
+import * as THREE from './libs/threejs/build/three.module.js';
+import { GLTFLoader } from './libs/threejs/examples/jsm/loaders/GLTFLoader.js';
 
-        const modelsLoaderManager = new THREE.LoadingManager();
-        modelsLoaderManager.onLoad = () => {
-                init();
-        };
-        {
-            const gltfLoader = new GLTFLoader(modelsLoaderManager);
-            for (const model of Object.values(models)) {
-                gltfLoader.load(model.url, (gltf) => {
-    
-                    gltf.scene.traverse( function ( child ) {
-    
-                        if ( child.isMesh ) {
-                            if( child.castShadow !== undefined ) {
-                                child.castShadow = true;
-                                child.receiveShadow = true;
-                            }
-                        }
-                        console.log(child.name);
-                    } );
-                    model.gltf = gltf.scene; 
-                });
-            }
-        } 
-    }
+// Scene params
+
+const models = {
+	crash:    { url: './assets/crash.glb' },
+	aku_aku:  { url: './assets/aku_aku.glb'},
+	box:  { url: './assets/box.glb'},
+	jump_box:  { url: './assets/jump_box.glb'},
+	tnt:  { url: './assets/tnt.glb'},
+	wampa_fruit:  { url: './assets/wampa_fruit.glb'},
+	rock_sphere:  { url: './assets/rock_sphere.glb'}
+};
+var keyboard = {};
+var scene;
+var camera,player;
+var enemies,collectibles;
+var score;
+var renderer;
+var scoreElement;
+
+
+
+
+loadModels();
+function loadModels() {
+
+	const modelsLoaderManager = new THREE.LoadingManager();
+	modelsLoaderManager.onLoad = () => {
+			init();
+	};
+	{
+		const gltfLoader = new GLTFLoader(modelsLoaderManager);
+		for (const model of Object.values(models)) {
+			gltfLoader.load(model.url, (gltf) => {
+				
+				//console.log();
+				
+				gltf.scene.traverse( function ( child ) {
+
+					if ( child.isMesh ) {
+						if( child.castShadow !== undefined ) {
+							child.castShadow = true;
+							child.receiveShadow = true;
+						}
+					}
+					console.log(child.name);
+				} );
+				model.gltf = gltf.scene; 
+			});
+		}
+	} 
+}
 
 function init(){
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
@@ -48,11 +69,18 @@ function init(){
     const collectibleMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
 
     // Player
-    const player = new THREE.Mesh(playerGeometry, playerMaterial);
+    player = new THREE.Mesh(playerGeometry, playerMaterial);
+    /*
+    player = new THREE.Mesh();
+	player.name = "crash";
+    var body = models.crash.gltf.getObjectByName('RootNode');
+    //body.scale.set(.5, .5, .5);
+    player.add(body);
+    */
     scene.add(player);
 
     // Enemies
-    const enemies = [];
+    enemies = [];
     for (let i = 0; i < 5; i++) {
         const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
         enemy.position.set(Math.random() * 10 - 5, 0, Math.random() * 10 - 5);
@@ -61,7 +89,7 @@ function init(){
     }
 
     // Collectibles
-    const collectibles = [];
+    collectibles = [];
     for (let i = 0; i < 10; i++) {
         const collectible = new THREE.Mesh(collectibleGeometry, collectibleMaterial);
         collectible.position.set(Math.random() * 10 - 5, 0, Math.random() * 10 - 5);
@@ -70,7 +98,7 @@ function init(){
     }
 
     // User interaction
-    const keyboard = {};
+    //const keyboard = {};
     document.addEventListener('keydown', function(event) {
         keyboard[event.code] = true;
     });
@@ -87,8 +115,8 @@ function init(){
     scene.add(directionalLight);
 
     // Game variables
-    let score = 0;
-    const scoreElement = document.createElement('div');
+    score = 0;
+    scoreElement = document.createElement('div');
     document.body.appendChild(scoreElement);
     animate();
 }
