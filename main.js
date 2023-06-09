@@ -15,6 +15,7 @@ const models = {
 var keyboard = {};
 var scene;
 var camera,player;
+var playerBones = {};
 var enemies,collectibles;
 var score;
 var renderer;
@@ -44,6 +45,7 @@ function loadModels() {
 							child.castShadow = true;
 							child.receiveShadow = true;
 						}
+						//console.log(child.name);
 					}
 					
 						console.log(child.name);
@@ -78,13 +80,21 @@ function init(){
     var body = models.crash.gltf.getObjectByName('crash');
     body.scale.set(.1, .1, .1);
     player.add(body);
+    initPlayerSkeleton();
     
     scene.add(player);
 
     // Enemies
     enemies = [];
     for (let i = 0; i < 5; i++) {
-        const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
+        //const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
+        
+        const enemy = new THREE.Mesh();
+        var mesh = models.box.gltf.getObjectByName('Object_4').clone();
+        mesh.scale.set(0.6,0.6,0.6);
+        
+        enemy.add(mesh);
+        
         enemy.position.set(Math.random() * 10 - 5, 0, Math.random() * 10 - 5);
         scene.add(enemy);
         enemies.push(enemy);
@@ -93,14 +103,14 @@ function init(){
     // Collectibles
     collectibles = [];
     for (let i = 0; i < 10; i++) {
-        const collectible = new THREE.Mesh(collectibleGeometry, collectibleMaterial);
-        /*
-        const collectible = new THREE.Mesh();
+        //const collectible = new THREE.Mesh(collectibleGeometry, collectibleMaterial);
         
-        var model = models.wumpa.gltf.getObjectByName('Sketchfab_model');
-		//model.scale.set(0.1,0.1,0.1);
-        collectible.add(model);
-        */ 
+        const collectible = new THREE.Mesh();  
+        var mesh = models.wumpa.gltf.getObjectByName('Sketchfab_model').clone();
+        //console.log(mesh);
+		mesh.scale.set(0.05,0.05,0.05);
+        collectible.add(mesh);
+
         collectible.position.set(Math.random() * 10 - 5, 0, Math.random() * 10 - 5);
         scene.add(collectible);
         collectibles.push(collectible);
@@ -129,46 +139,97 @@ function init(){
     document.body.appendChild(scoreElement);
     animate();
 }
-    // Game loop
-    function animate() {
-        requestAnimationFrame(animate);
 
-        // Handle user input
-        if (keyboard['KeyW']) player.position.z -= 0.1;
-        if (keyboard['KeyS']) player.position.z += 0.1;
-        if (keyboard['KeyA']) player.position.x -= 0.1;
-        if (keyboard['KeyD']) player.position.x += 0.1;
 
-        // Update camera position
-        camera.position.copy(player.position);
-        camera.position.y += 3;
-        camera.lookAt(player.position);
+function initPlayerSkeleton(){
+	
+	player.traverse( b =>  {
+		if (b.isBone && b.name === 'Bone') { 
+			playerBones.torso = b;
+		}
+		if (b.isBone && b.name === 'Bone001') { 
+			playerBones.rightUpperLeg = b;
+		}
+		if (b.isBone && b.name === 'Bone005') { 
+			playerBones.rightLowerLeg = b;
+		}
+		if (b.isBone && b.name === 'Bone006') { 
+			playerBones.leftUpperLeg = b;
+		}
+		if (b.isBone && b.name === 'Bone007') { 
+			playerBones.leftLowerLeg = b;
+		}
+		if (b.isBone && b.name === 'Bone009') { 
+			playerBones.rightUpperArm = b;
+		}
+		if (b.isBone && b.name === 'Bone010') { 
+			playerBones.rightLowerArm = b;
+		}
+		if (b.isBone && b.name === 'Bone012') { 
+			playerBones.leftUpperArm = b;
+		}
+		if (b.isBone && b.name === 'Bone013') { 
+			playerBones.leftLowerArm = b;
+		}
+		if (b.isBone && b.name === 'Bone008') { 
+			playerBones.head = b;
+		}
+		if (b.isBone && b.name === 'Bone011') { 
+			playerBones.nose = b;
+		}
+		if (b.isBone && b.name === 'Bone014') { 
+			playerBones.rightEar = b;
+		}
+		if (b.isBone && b.name === 'Bone015') { 
+			playerBones.leftEar = b;
+		}
+		
+	});
 
-        // Update game logic
-        for (let i = 0; i < enemies.length; i++) {
-            const enemy = enemies[i];
-            enemy.rotation.x += 0.02;
-            enemy.rotation.y += 0.01;
-            enemy.rotation.z += 0.03;
-            if (enemy.position.distanceTo(player.position) < 1) {
-                // Game over logic
-                alert('Game Over! Your score: ' + score);
-                location.reload();
-                break;
-            }
-        }
+}
 
-        for (let i = 0; i < collectibles.length; i++) {
-            const collectible = collectibles[i];
-            if (collectible.position.distanceTo(player.position) < 1) {
-                // Collectible logic
-                scene.remove(collectible);
-                collectibles.splice(i, 1);
-                score++;
-                scoreElement.innerText = 'Score: ' + score;
-                i--;
-            }
-        }
 
-        renderer.render(scene, camera);
-    }
+
+// Game loop
+function animate() {
+	requestAnimationFrame(animate);
+
+	// Handle user input
+	if (keyboard['KeyW']) player.position.z -= 0.1;
+	if (keyboard['KeyS']) player.position.z += 0.1;
+	if (keyboard['KeyA']) player.position.x -= 0.1;
+	if (keyboard['KeyD']) player.position.x += 0.1;
+
+	// Update camera position
+	camera.position.copy(player.position);
+	camera.position.y += 3;
+	camera.lookAt(player.position);
+
+	// Update game logic
+	for (let i = 0; i < enemies.length; i++) {
+		const enemy = enemies[i];
+		enemy.rotation.x += 0.02;
+		enemy.rotation.y += 0.01;
+		enemy.rotation.z += 0.03;
+		if (enemy.position.distanceTo(player.position) < 1) {
+			// Game over logic
+			alert('Game Over! Your score: ' + score);
+			location.reload();
+			break;
+		}
+	}
+
+	for (let i = 0; i < collectibles.length; i++) {
+		const collectible = collectibles[i];
+		if (collectible.position.distanceTo(player.position) < 1) {
+			// Collectible logic
+			scene.remove(collectible);
+			collectibles.splice(i, 1);
+			score++;
+			scoreElement.innerText = 'Score: ' + score;
+			i--;
+		}
+	}
+
+	renderer.render(scene, camera);
+}
