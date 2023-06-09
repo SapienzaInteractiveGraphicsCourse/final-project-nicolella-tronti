@@ -9,7 +9,7 @@ const models = {
 	box:  { url: './assets/box.glb'},
 	jump_box:  { url: './assets/jump_box.glb'},
 	tnt:  { url: './assets/tnt.glb'},
-	wampa_fruit:  { url: './assets/wampa_fruit.glb'},
+	wumpa:  { url: './assets/wumpa_fruit.glb'},
 	rock_sphere:  { url: './assets/rock_sphere.glb'}
 };
 var keyboard = {};
@@ -45,7 +45,9 @@ function loadModels() {
 							child.receiveShadow = true;
 						}
 					}
-					console.log(child.name);
+					
+						console.log(child.name);
+					
 				} );
 				model.gltf = gltf.scene; 
 			});
@@ -69,14 +71,14 @@ function init(){
     const collectibleMaterial = new THREE.MeshPhongMaterial({ color: 0xff00ff });
 
     // Player
-    player = new THREE.Mesh(playerGeometry, playerMaterial);
-    /*
+    //player = new THREE.Mesh(playerGeometry, playerMaterial);
+    
     player = new THREE.Mesh();
 	player.name = "crash";
-    var body = models.crash.gltf.getObjectByName('RootNode');
-    //body.scale.set(.5, .5, .5);
+    var body = models.crash.gltf.getObjectByName('crash');
+    body.scale.set(.1, .1, .1);
     player.add(body);
-    */
+    
     scene.add(player);
 
     // Enemies
@@ -92,6 +94,13 @@ function init(){
     collectibles = [];
     for (let i = 0; i < 10; i++) {
         const collectible = new THREE.Mesh(collectibleGeometry, collectibleMaterial);
+        /*
+        const collectible = new THREE.Mesh();
+        
+        var model = models.wumpa.gltf.getObjectByName('Sketchfab_model');
+		//model.scale.set(0.1,0.1,0.1);
+        collectible.add(model);
+        */ 
         collectible.position.set(Math.random() * 10 - 5, 0, Math.random() * 10 - 5);
         scene.add(collectible);
         collectibles.push(collectible);
