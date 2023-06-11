@@ -77,8 +77,8 @@ function init(){
     var texture_back = new THREE.TextureLoader().load('./texture/sky1.jpg');
 	var texture_up = new THREE.TextureLoader().load('./texture/sky1.jpg');
 	var texture_down = new THREE.TextureLoader().load('./texture/beach.jpg');
-	var texture_right = new THREE.TextureLoader().load('./texture/sky1.jpg');
-	var texture_left = new THREE.TextureLoader().load('./texture/sky1.jpg');
+	var texture_right = new THREE.TextureLoader().load('./texture/forest.jpg');
+	var texture_left = new THREE.TextureLoader().load('./texture/forest.jpg');
     
 	materialArray.push(new THREE.MeshBasicMaterial({map: texture_front}));
 	materialArray.push(new THREE.MeshBasicMaterial({map: texture_back}));
