@@ -27,8 +27,8 @@ var jumpHeight = 2;
 var jumpSpeed = 0.1;
 var jumpDir = 1;
 var map;
-var minX = -3.8;
-var maxX = 3.8;
+var minX = -1.0;
+var maxX = 1.0;
 var minZ = -1;
 
 
@@ -105,7 +105,7 @@ function init(){
 	//Map
 	map = new THREE.Mesh();
 	var mapmesh = models.mappirate.gltf.getObjectByName('Object_2').clone();
-	mapmesh.scale.set(0.008,0.008,0.008);
+	mapmesh.scale.set(0.0034,0.0034,0.0034);
 	map.add(mapmesh);
 	map.position.set(0.0,0.0,0.0);
 	scene.add(map);
