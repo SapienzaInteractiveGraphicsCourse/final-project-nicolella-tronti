@@ -30,7 +30,7 @@ var map;
 var minX = -1.0;
 var maxX = 1.0;
 var minZ = -1;
-
+var health =1;
 
 loadModels();
 function loadModels() {
@@ -287,9 +287,14 @@ function animate() {
 			  enemies.splice(i, 1);
 			  i--;
 		
-			  // Increase the score
-			  score++;
-			  scoreElement.innerText = 'Score: ' + score;
+			  // Increase the score and health
+			  score+=5;
+			  if(score >=15){
+				health++;
+				document.getElementById('health').textContent =health;
+				score=0;
+			  }
+			  document.getElementById('fruits').textContent = score;
 			}	
 		}
 	}
@@ -300,7 +305,12 @@ function animate() {
 			scene.remove(collectible);
 			collectibles.splice(i, 1);
 			score++;
-			scoreElement.innerText = 'Score: ' + score;
+			if(score >=15){
+				health++;
+				document.getElementById('health').textContent =health;
+				score=0;
+			  }
+			document.getElementById('fruits').textContent = score;
 			i--;
 		}
 	}

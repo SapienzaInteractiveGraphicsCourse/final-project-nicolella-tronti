@@ -4,11 +4,50 @@
     <meta charset="UTF-8">
     <title>Three.js Game</title>
     <style>
+        @font-face {
+            font-family: 'CrashBand';
+            src: url('./font/CrashTeamRacing.ttf');
+        }
+        *{
+            font-family: 'CrashBand';
+            color: orange;
+        }
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
+        #score_box{
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .Row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .Column {
+            display: flex;
+            align-items: center;
+            margin-right: 50px;
+        }
+        #score_box h2{
+            font-size: 30px;
+        }
     </style>
 </head>
 <body>
+    <div id="score_box">
+        <div class="Row">
+            <div class="Column">
+                <img src="./texture/health.png" width="50" height="50"></img>
+                <h2 id="health">1</h2>
+            </div>
+            <div class="Column">
+                <img src="./texture/wumpafruit.png" width="50" height="50"></img>
+                <h2 id="fruits">0</h2>
+            </div>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
     <script type="module" src="main.js"></script>
 </body>
