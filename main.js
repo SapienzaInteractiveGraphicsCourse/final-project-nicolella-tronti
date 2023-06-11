@@ -5,12 +5,13 @@ import { GLTFLoader } from './libs/threejs/examples/jsm/loaders/GLTFLoader.js';
 
 const models = {
 	crash:    { url: './assets/crash.glb' },
-	aku_aku:  { url: './assets/aku_aku.glb'},
+	//aku_aku:  { url: './assets/aku_aku.glb'},
 	box:  { url: './assets/box.glb'},
-	jump_box:  { url: './assets/jump_box.glb'},
-	tnt:  { url: './assets/tnt.glb'},
+	//jump_box:  { url: './assets/jump_box.glb'},
+	//tnt:  { url: './assets/tnt.glb'},
 	wumpa:  { url: './assets/wumpa_fruit.glb'},
-	rock_sphere:  { url: './assets/rock_sphere.glb'}
+	//rock_sphere:  { url: './assets/rock_sphere.glb'},
+	mappirate: {url: './assets/game_pirate_adventure_map.glb'}
 };
 var keyboard = {};
 var scene;
@@ -25,6 +26,10 @@ var isJumping = false;
 var jumpHeight = 2;
 var jumpSpeed = 0.1;
 var jumpDir = 1;
+var map;
+var minX = -3.8;
+var maxX = 3.8;
+var minZ = -1;
 
 
 loadModels();
@@ -83,7 +88,7 @@ function init(){
 	materialArray.push(new THREE.MeshBasicMaterial({map: texture_left}));	
 	
 	for (let i= 0; i< 6; i++) materialArray[i].side = THREE.BackSide;
-	var skyboxGeo = new THREE.BoxGeometry(100, 100, 100);
+	var skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
 	var skybox = new THREE.Mesh(skyboxGeo, materialArray);
 	scene.add(skybox);
 
@@ -92,10 +97,19 @@ function init(){
 	player.name = "crash";
     var body = models.crash.gltf.getObjectByName('crash');
     body.scale.set(.1, .1, .1);
+	player.position.set(0, 0, 0);
     player.add(body);
     initPlayerSkeleton();
-    
     scene.add(player);
+
+	//Map
+	map = new THREE.Mesh();
+	var mapmesh = models.mappirate.gltf.getObjectByName('Object_2').clone();
+	mapmesh.scale.set(0.008,0.008,0.008);
+	map.add(mapmesh);
+	map.position.set(0.0,0.0,0.0);
+	scene.add(map);
+	
 
     // Enemies
     enemies = [];
@@ -201,18 +215,45 @@ function initPlayerSkeleton(){
 function checkCollision(object1, object2){
 	const box1 = new THREE.Box3().setFromObject(object1);
 	const box2 = new THREE.Box3().setFromObject(object2);
+	
 	return box1.intersectsBox(box2);
 }
-
+function checkCollisionPlayer(player, enemy) {
+	const playerBox = new THREE.Box3().setFromObject(player);
+	const enemyBox = new THREE.Box3().setFromObject(enemy);
+  
+	// Get the top position of the enemy
+	const enemyTop = enemy.position.y + enemyBox.max.y;
+  
+	// Check if the player's position is above the top of the enemy
+	return (
+	  playerBox.min.y <= enemyTop &&
+	  playerBox.max.y >= enemyTop &&
+	  playerBox.intersectsBox(enemyBox)
+	);
+  }
 // Game loop
 function animate() {
 	requestAnimationFrame(animate);
-
-	// Handle user input
-	if (keyboard['KeyW']) player.position.z += 0.1;
-	if (keyboard['KeyS']) player.position.z -= 0.1;
-	if (keyboard['KeyA']) player.position.x += 0.1;
-	if (keyboard['KeyD']) player.position.x -= 0.1;
+	
+	if (keyboard['KeyW']) {
+		player.position.z += 0.1;
+	}
+	if (keyboard['KeyS']) {
+		if (player.position.z > minZ) {
+			player.position.z -= 0.1;
+		}
+	}
+	if (keyboard['KeyA']) {
+		if (player.position.x < maxX) {
+			player.position.x += 0.1;
+		}
+	}
+	if (keyboard['KeyD']) {
+		if (player.position.x > minX) {
+			player.position.x -= 0.1;
+		}
+	}
 	if (keyboard['Space'] && !isJumping){
 		isJumping = true;
 		jumpDir = 1;
@@ -228,7 +269,7 @@ function animate() {
 	}
 	// Update camera position
 	camera.position.copy(player.position);
-	camera.position.y += 3;
+	camera.position.y += 2;
 	camera.position.z -= 3;
 	camera.lookAt(player.position);
 
@@ -236,14 +277,22 @@ function animate() {
 	for (let i = 0; i < enemies.length; i++) {
 		const enemy = enemies[i];
 		
-		if (checkCollision(player, enemy)) {
-			// Game over logic
-			alert('Game Over! Your score: ' + score);
-			location.reload();
-			break;
+		if (checkCollisionPlayer(player, enemy)) {
+			const playerBottom = player.position.y - (playerBones.torso ? playerBones.torso.position.y : 0);
+
+			// Check if the player's bottom position is above the enemy's top
+			if (playerBottom >= enemy.position.y) {
+			  // Remove the box from the scene
+			  scene.remove(enemy);
+			  enemies.splice(i, 1);
+			  i--;
+		
+			  // Increase the score
+			  score++;
+			  scoreElement.innerText = 'Score: ' + score;
+			}	
 		}
 	}
-
 	for (let i = 0; i < collectibles.length; i++) {
 		const collectible = collectibles[i];
 		if (checkCollision(player, collectible)) {
