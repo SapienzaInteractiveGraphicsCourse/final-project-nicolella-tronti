@@ -168,43 +168,43 @@ function init(){
 function initPlayerSkeleton(){
 	
 	player.traverse( b =>  {
-		if (b.isBone && b.name === 'root_152') { 
+		if (b.isBone && b.name === 'spine_01_128') { 
 			playerBones.torso = b;
 		}
-		if (b.isBone && b.name === 'Bone001') { 
+		if (b.isBone && b.name === 'hip_r_150') { 
 			playerBones.rightUpperLeg = b;
 		}
-		if (b.isBone && b.name === 'Bone005') { 
+		if (b.isBone && b.name === 'calf_r_145') { 
 			playerBones.rightLowerLeg = b;
 		}
-		if (b.isBone && b.name === 'Bone006') { 
+		if (b.isBone && b.name === 'hip_l_139') { 
 			playerBones.leftUpperLeg = b;
 		}
-		if (b.isBone && b.name === 'Bone007') { 
+		if (b.isBone && b.name === 'calf_l_134') { 
 			playerBones.leftLowerLeg = b;
 		}
-		if (b.isBone && b.name === 'Bone009') { 
+		if (b.isBone && b.name === 'upperarm_r_119') { 
 			playerBones.rightUpperArm = b;
 		}
-		if (b.isBone && b.name === 'Bone010') { 
+		if (b.isBone && b.name === 'lowerarm_r_115') { 
 			playerBones.rightLowerArm = b;
 		}
-		if (b.isBone && b.name === 'Bone012') { 
+		if (b.isBone && b.name === 'upperarm_l_27') { 
 			playerBones.leftUpperArm = b;
 		}
-		if (b.isBone && b.name === 'Bone013') { 
+		if (b.isBone && b.name === 'lowerarm_l_23') { 
 			playerBones.leftLowerArm = b;
 		}
-		if (b.isBone && b.name === 'Bone008') { 
+		if (b.isBone && b.name === 'head_91') { 
 			playerBones.head = b;
 		}
-		if (b.isBone && b.name === 'Bone011') { 
+		if (b.isBone && b.name === 'nose_01_31') { 
 			playerBones.nose = b;
 		}
-		if (b.isBone && b.name === 'Bone014') { 
+		if (b.isBone && b.name === 'ear_01_r_37') { 
 			playerBones.rightEar = b;
 		}
-		if (b.isBone && b.name === 'Bone015') { 
+		if (b.isBone && b.name === 'ear_01_l_34') { 
 			playerBones.leftEar = b;
 		}
 		
