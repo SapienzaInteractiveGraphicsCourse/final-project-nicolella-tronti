@@ -239,6 +239,10 @@ function animate() {
 	if (keyboard['KeyW']) {
 		player.position.z += 0.1;
 	}
+	if (keyboard['KeyS']) {
+		player.position.z += 0.1
+		if(player.position > minZ) player.position.z -= 0.1;
+	}
 	if (keyboard['KeyA']) {
 		if (player.position.x < maxX) {
 			player.position.x += 0.1;
