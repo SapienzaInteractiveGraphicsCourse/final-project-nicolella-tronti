@@ -13,6 +13,21 @@ const models = {
 	//rock_sphere:  { url: './assets/rock_sphere.glb'},
 	mappirate: {url: './assets/game_pirate_adventure_map.glb'}
 };
+
+const sounds = {
+	
+	menu: 	{url: './sounds/01-32. Crash Bandicoot (Pre-Console).mp3'},
+	bgm:	{url: './sounds/01-01. Crash Bandicoot.mp3'},
+	box1:	{url: './sounds/S000000A.NSF_00013.wav'},
+	death:	{url: './sounds/S000000F.NSF_00017.wav'},
+	wumpa:	{url: './sounds/S0000003.NSF_00014.wav'},
+	box2:	{url: './sounds/S0000003.NSF_00015.wav'},
+	enemy:	{url: './sounds/S0000003.NSF_00044.wav'},
+	tnt:	{url: './sounds/S0000003.NSF_00060.wav'},
+	life:	{url: './sounds/S0000003.NSF_00005.wav'}
+};
+
+
 var keyboard = {};
 var scene;
 var camera,player;
@@ -31,13 +46,22 @@ var minX = -1.5;
 var maxX = 1.5;
 var minZ = 3;
 var health =1;
+var modelsOK = 0,soundsOK = 0;
 
 loadModels();
+loadSounds();
+
+
 function loadModels() {
 
 	const modelsLoaderManager = new THREE.LoadingManager();
 	modelsLoaderManager.onLoad = () => {
+		
+		modelsOK = 1;
+		
+		if(modelsOK && soundsOK){
 			init();
+		}
 	};
 	{
 		const gltfLoader = new GLTFLoader(modelsLoaderManager);
@@ -64,6 +88,37 @@ function loadModels() {
 		}
 	} 
 }
+
+
+function loadSounds() {
+
+	const soundsLoaderManager = new THREE.LoadingManager();
+	soundsLoaderManager.onLoad = () => {
+
+		soundsOK = 1;
+
+
+		if(modelsOK && soundsOK) {
+			init();
+		}
+	};
+
+	{
+		const audioLoader = new THREE.AudioLoader(soundsLoaderManager);
+		for (const sound of Object.values(sounds)) {
+			audioLoader.load( sound.url, function( buffer ) {
+				
+				sound.sound = buffer;
+
+				console.log("Loaded ", buffer);
+			});
+		}
+	} 
+}
+
+
+
+
 
 function init(){
     scene = new THREE.Scene();
