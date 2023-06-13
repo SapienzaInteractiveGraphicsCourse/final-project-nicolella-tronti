@@ -4,7 +4,7 @@ import { GLTFLoader } from './libs/threejs/examples/jsm/loaders/GLTFLoader.js';
 // Scene params
 
 const models = {
-	crash:    { url: './assets/crash.glb' },
+	crash:    { url: './assets/crash4.glb' },
 	//aku_aku:  { url: './assets/aku_aku.glb'},
 	box:  { url: './assets/box.glb'},
 	//jump_box:  { url: './assets/jump_box.glb'},
@@ -95,8 +95,8 @@ function init(){
 	// Player
     player = new THREE.Mesh();
 	player.name = "crash";
-    var body = models.crash.gltf.getObjectByName('crash');
-    body.scale.set(.1, .1, .1);
+    var body = models.crash.gltf.getObjectByName('Sketchfab_model');
+    body.scale.set(2,2, 2);
 	player.position.set(0, 0, 0);
     player.add(body);
     initPlayerSkeleton();
@@ -168,7 +168,7 @@ function init(){
 function initPlayerSkeleton(){
 	
 	player.traverse( b =>  {
-		if (b.isBone && b.name === 'Bone') { 
+		if (b.isBone && b.name === 'root_152') { 
 			playerBones.torso = b;
 		}
 		if (b.isBone && b.name === 'Bone001') { 
@@ -238,11 +238,6 @@ function animate() {
 	
 	if (keyboard['KeyW']) {
 		player.position.z += 0.1;
-	}
-	if (keyboard['KeyS']) {
-		if (player.position.z > minZ) {
-			player.position.z -= 0.1;
-		}
 	}
 	if (keyboard['KeyA']) {
 		if (player.position.x < maxX) {
