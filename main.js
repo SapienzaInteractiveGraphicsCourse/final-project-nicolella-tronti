@@ -27,9 +27,9 @@ var jumpHeight = 2;
 var jumpSpeed = 0.1;
 var jumpDir = 1;
 var map;
-var minX = -1.0;
-var maxX = 1.0;
-var minZ = -1;
+var minX = -1.5;
+var maxX = 1.5;
+var minZ = 3;
 var health =1;
 
 loadModels();
@@ -97,7 +97,7 @@ function init(){
 	player.name = "crash";
     var body = models.crash.gltf.getObjectByName('Sketchfab_model');
     body.scale.set(2,2, 2);
-	player.position.set(0, 0, 0);
+	player.position.set(0, 0, 4);
     player.add(body);
     initPlayerSkeleton();
     scene.add(player);
