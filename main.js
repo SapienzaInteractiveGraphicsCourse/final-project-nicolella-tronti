@@ -177,7 +177,7 @@ function init(){
 	map.position.set(0.0,0.0,0.0);
 	scene.add(map);
 	
-	var waterTex = new THREE.TextureLoader.load('./texture/water.jpg');
+	var waterTex = new THREE.TextureLoader().load('./texture/water.jpg');
 	var waterMat = new THREE.MeshPhongMaterial({map: waterTex,transparent: true, opacity: 0.5});
 
 	water = new THREE.Mesh(new THREE.PlaneGeometry(30, 50), waterMat);
