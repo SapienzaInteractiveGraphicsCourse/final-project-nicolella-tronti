@@ -17,7 +17,7 @@ const models = {
 const sounds = {
 	
 	menu: 	{url: './sounds/01-32. Crash Bandicoot (Pre-Console).mp3'},
-	bgm:	{url: './sounds/bgm1.wav'},
+	bgm:	{url: './sounds/bgm2.wav'},
 	box1:	{url: './sounds/box.wav'},
 	death:	{url: './sounds/S000000F.NSF_00017.wav'},
 	wumpa:	{url: './sounds/S0000003.NSF_00014.wav'},
