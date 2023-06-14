@@ -1,6 +1,6 @@
 import * as THREE from './libs/threejs/build/three.module.js';
 import { GLTFLoader } from './libs/threejs/examples/jsm/loaders/GLTFLoader.js';
-
+import TWEEN from './libs/tween.esm.js';
 // Scene params
 
 const models = {
@@ -17,8 +17,8 @@ const models = {
 const sounds = {
 	
 	menu: 	{url: './sounds/01-32. Crash Bandicoot (Pre-Console).mp3'},
-	bgm:	{url: './sounds/01-01. Crash Bandicoot.mp3'},
-	box1:	{url: './sounds/S000000A.NSF_00013.wav'},
+	bgm:	{url: './sounds/bgm1.wav'},
+	box1:	{url: './sounds/box.wav'},
 	death:	{url: './sounds/S000000F.NSF_00017.wav'},
 	wumpa:	{url: './sounds/S0000003.NSF_00014.wav'},
 	box2:	{url: './sounds/S0000003.NSF_00015.wav'},
@@ -47,7 +47,12 @@ var maxX = 1.5;
 var minZ = 3;
 var health =1;
 var modelsOK = 0,soundsOK = 0;
+var backgroundSound, sound, listener, audioLoader;
+var runTweens = [];
+var waveTweens = [];
+var wumpaTween;
 var water;
+
 
 loadModels();
 loadSounds();
@@ -127,6 +132,11 @@ function init(){
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
+	listener= new THREE.AudioListener();
+	camera.add(listener);
+
+	sound = new THREE.Audio(listener);
+	backgroundSound = new THREE.Audio(listener);
 	//SkyBox
 	var materialArray = [];
 	var texture_front = new THREE.TextureLoader().load('./texture/sky1.jpg');
@@ -147,13 +157,14 @@ function init(){
 	var skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
 	var skybox = new THREE.Mesh(skyboxGeo, materialArray);
 	scene.add(skybox);
-
+	audioLoader= new THREE.AudioLoader();
+	
 	// Player
     player = new THREE.Mesh();
 	player.name = "crash";
     var body = models.crash.gltf.getObjectByName('Sketchfab_model');
     body.scale.set(2,2, 2);
-	player.position.set(0, 0, 240);
+	player.position.set(0, 0, 4);
     player.add(body);
     initPlayerSkeleton();
     scene.add(player);
@@ -166,17 +177,13 @@ function init(){
 	map.position.set(0.0,0.0,0.0);
 	scene.add(map);
 	
-	//Water
-	console.log("carico l'acqua");
-	var waterTex = new THREE.TextureLoader().load('./texture/water.jpg');
-	var waterMat = new THREE.MeshPhongMaterial({map: waterTex,transparent: true,opacity: 0.5});
-	//var waterMat = new THREE.MeshBasicMaterial({map: waterTex});
-	water = new THREE.Mesh(new THREE.PlaneGeometry(30,50),waterMat);
+	var waterTex = new THREE.TextureLoader.load('./texture/water.jpg');
+	var waterMat = new THREE.MeshPhongMaterial({map: waterTex,transparent: true, opacity: 0.5});
+
+	water = new THREE.Mesh(new THREE.PlaneGeometry(30, 50), waterMat);
 	water.position.set(0,-1.5,255);
 	water.rotation.x = (-Math.PI/2);
 	scene.add(water);
-	
-
     // Enemies
     enemies = [];
     for (let i = 0; i < 5; i++) {
@@ -214,19 +221,40 @@ function init(){
     document.addEventListener('keyup', function(event) {
         keyboard[event.code] = false;
     });
-
+	playBackMusic();
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0x404040);
-    scene.add(ambientLight);
+	const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+	scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(0, 3, 2);
-    scene.add(directionalLight);
+	const directLight = new THREE.DirectionalLight(0xffffff, 3, 100);
+	directLight.position.set(0, 50, player.position.z + 20);
+	
+	var directLightTargetObject = new THREE.Object3D();
+	directLightTargetObject.position.set(0, 0, player.position.z + 20);
+	scene.add(directLightTargetObject);
+	directLight.target = directLightTargetObject;
+	
+	directLight.castShadow = true;
+	directLight.shadow.mapSize.width = 512;
+	directLight.shadow.mapSize.height = 512;
 
+	const d = 60;
+	directLight.shadow.camera.left = -10;
+	directLight.shadow.camera.right = 10;
+	directLight.shadow.camera.top = 140;
+	directLight.shadow.camera.bottom = 0;
+	directLight.shadow.camera.near = 30;
+	directLight.shadow.camera.far = 55;
+	directLight.shadow.bias = 0.0009;
+
+	scene.add(directLight);
+
+	
     // Game variables
     score = 0;
     scoreElement = document.createElement('div');
     document.body.appendChild(scoreElement);
+	
     animate();
 }
 
@@ -300,7 +328,6 @@ function checkCollisionPlayer(player, enemy) {
   }
 // Game loop
 function animate() {
-	console.log(player.position);
 	requestAnimationFrame(animate);
 	
 	if (keyboard['KeyW']) {
@@ -346,10 +373,11 @@ function animate() {
 		
 		if (checkCollisionPlayer(player, enemy)) {
 			const playerBottom = player.position.y - (playerBones.torso ? playerBones.torso.position.y : 0);
-
+			
 			// Check if the player's bottom position is above the enemy's top
 			if (playerBottom >= enemy.position.y) {
 			  // Remove the box from the scene
+			  playBoxSound();
 			  scene.remove(enemy);
 			  enemies.splice(i, 1);
 			  i--;
@@ -362,13 +390,31 @@ function animate() {
 				score=0;
 			  }
 			  document.getElementById('fruits').textContent = score;
-			}	
+			}else{
+			if (keyboard['KeyW']) {
+				player.position.z -= 0.1;
+			}
+			if (keyboard['KeyS']) {
+				player.position.z += 0.1;
+			}
+			if (keyboard['KeyA']) {
+				player.position.x -= 0.1;
+			}
+			if (keyboard['KeyD']) {
+				player.position.x += 0.1;
+			}
+			camera.position.copy(player.position);
+			camera.position.y += 2;
+			camera.position.z -= 3;
+			camera.lookAt(player.position);
+		}	
 		}
 	}
 	for (let i = 0; i < collectibles.length; i++) {
 		const collectible = collectibles[i];
 		if (checkCollision(player, collectible)) {
 			// Collectible logic
+			playWumpaSound();
 			scene.remove(collectible);
 			collectibles.splice(i, 1);
 			score++;
@@ -384,3 +430,56 @@ function animate() {
 
 	renderer.render(scene, camera);
 }
+//animation functions
+function rad(degrees){
+	var pi = Math.PI;
+	return degrees * (pi/180);
+}
+
+function stopTweens(tweens) {
+	tweens.forEach( 
+		(tween) => {
+			tween.stop();
+		} 
+	);
+}
+
+function pauseTweens(tweens) {
+	tweens.forEach( 
+		(tween) => {
+			tween.pause();
+		} 
+	);
+}
+
+function resumeTweens(tweens) {
+	tweens.forEach( 
+		(tween) => {
+			tween.resume();
+		} 
+	);	
+}
+
+//sound functions
+function playBackMusic(){
+	backgroundSound.isPlaying = false;
+	backgroundSound.setBuffer(sounds.bgm.sound);
+	backgroundSound.setLoop(true);
+	backgroundSound.setVolume(0.5);
+	backgroundSound.play();
+}
+
+function playWumpaSound(){
+	sound.isPlaying = false;
+	sound.setBuffer(sounds.wumpa.sound);
+	sound.setVolume(0.3);
+	sound.play();
+}
+
+function playBoxSound(){
+	sound.isPlaying = false;
+	sound.setBuffer(sounds.box1.sound);
+	sound.setVolume(0.6);
+	sound.play();
+}
+
