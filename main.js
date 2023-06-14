@@ -39,6 +39,7 @@ var scoreElement;
 //Jump
 var isJumping = false;
 var jumpHeight = 2;
+var jumpBoxHeight = 4;
 var jumpSpeed = 0.1;
 var jumpDir = 1;
 var map;
@@ -67,6 +68,7 @@ function loadModels() {
 		
 		if(modelsOK && soundsOK){
 			init();
+			
 		}
 	};
 	{
@@ -381,7 +383,15 @@ function animate() {
 			  scene.remove(enemy);
 			  enemies.splice(i, 1);
 			  i--;
-		
+			  isJumping = true;
+			  jumpDir = 1;
+			  player.position.y += jumpDir * jumpSpeed;
+			  if(player.position.y >= jumpBoxHeight){
+				  jumpDir = -1;
+			  } else if (player.position.y <= 0){
+				  isJumping = false;
+				  player.position.y = 0.0;
+			  }
 			  // Increase the score and health
 			  score+=5;
 			  if(score >=15){
@@ -465,7 +475,8 @@ function playBackMusic(){
 	backgroundSound.isPlaying = false;
 	backgroundSound.setBuffer(sounds.bgm.sound);
 	backgroundSound.setLoop(true);
-	backgroundSound.setVolume(0.5);
+	backgroundSound.setVolume(0.3);
+	backgroundSound.autoPlay = true;
 	backgroundSound.play();
 }
 
