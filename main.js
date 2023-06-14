@@ -47,6 +47,7 @@ var maxX = 1.5;
 var minZ = 3;
 var health =1;
 var modelsOK = 0,soundsOK = 0;
+var water;
 
 loadModels();
 loadSounds();
@@ -132,8 +133,8 @@ function init(){
     var texture_back = new THREE.TextureLoader().load('./texture/sky1.jpg');
 	var texture_up = new THREE.TextureLoader().load('./texture/sky1.jpg');
 	var texture_down = new THREE.TextureLoader().load('./texture/beach.jpg');
-	var texture_right = new THREE.TextureLoader().load('./texture/forest.jpg');
-	var texture_left = new THREE.TextureLoader().load('./texture/forest.jpg');
+	var texture_right = new THREE.TextureLoader().load('./texture/sea6.jpeg');
+	var texture_left = new THREE.TextureLoader().load('./texture/sea6.jpeg');
     
 	materialArray.push(new THREE.MeshBasicMaterial({map: texture_front}));
 	materialArray.push(new THREE.MeshBasicMaterial({map: texture_back}));
@@ -152,7 +153,7 @@ function init(){
 	player.name = "crash";
     var body = models.crash.gltf.getObjectByName('Sketchfab_model');
     body.scale.set(2,2, 2);
-	player.position.set(0, 0, 4);
+	player.position.set(0, 0, 240);
     player.add(body);
     initPlayerSkeleton();
     scene.add(player);
@@ -164,6 +165,16 @@ function init(){
 	map.add(mapmesh);
 	map.position.set(0.0,0.0,0.0);
 	scene.add(map);
+	
+	//Water
+	console.log("carico l'acqua");
+	var waterTex = new THREE.TextureLoader().load('./texture/water.jpg');
+	var waterMat = new THREE.MeshPhongMaterial({map: waterTex,transparent: true,opacity: 0.5});
+	//var waterMat = new THREE.MeshBasicMaterial({map: waterTex});
+	water = new THREE.Mesh(new THREE.PlaneGeometry(30,50),waterMat);
+	water.position.set(0,-1.5,255);
+	water.rotation.x = (-Math.PI/2);
+	scene.add(water);
 	
 
     // Enemies
@@ -289,6 +300,7 @@ function checkCollisionPlayer(player, enemy) {
   }
 // Game loop
 function animate() {
+	console.log(player.position);
 	requestAnimationFrame(animate);
 	
 	if (keyboard['KeyW']) {
