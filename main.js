@@ -5,7 +5,7 @@ import TWEEN from './libs/tween.esm.js';
 
 const models = {
 	crash:    { url: './assets/crash4.glb' },
-	//aku_aku:  { url: './assets/aku_aku.glb'},
+	aku_aku:  { url: './assets/aku_aku.glb'},
 	box:  { url: './assets/box.glb'},
 	//jump_box:  { url: './assets/jump_box.glb'},
 	//tnt:  { url: './assets/tnt.glb'},
@@ -30,7 +30,7 @@ const sounds = {
 
 var keyboard = {};
 var scene;
-var camera,player;
+var camera,player, mask;
 var playerBones = {};
 var enemies,collectibles;
 var score;
@@ -47,10 +47,10 @@ var minX = -1.5;
 var maxX = 1.5;
 var minZ = 3;
 var health =1;
+var playerMask = 1;
 var modelsOK = 0,soundsOK = 0;
 var backgroundSound, sound, listener, audioLoader;
 var runTweens = [];
-var waveTweens = [];
 var wumpaTween;
 var water;
 
@@ -179,6 +179,7 @@ function init(){
 	map.position.set(0.0,0.0,0.0);
 	scene.add(map);
 	
+	//water
 	var waterTex = new THREE.TextureLoader().load('./texture/water.jpg');
 	var waterMat = new THREE.MeshPhongMaterial({map: waterTex,transparent: true, opacity: 0.5});
 
@@ -186,13 +187,23 @@ function init(){
 	water.position.set(0,-1.5,255);
 	water.rotation.x = (-Math.PI/2);
 	scene.add(water);
+
+	//Aku aku
+	mask = new THREE.Mesh();
+	var bodymask = models.aku_aku.gltf.getObjectByName('Aku_akupCube7');
+	mask.add(bodymask);
+	mask.position.set(player.position.x -1, player.position.y+1 , player.position.z);
+	mask.rotation.y = (-Math.PI /2);
+	mask.scale.set(0.1,0.1,0.1);
+	scene.add(mask);
+
     // Enemies
     enemies = [];
     for (let i = 0; i < 5; i++) {
         
         const enemy = new THREE.Mesh();
         var mesh = models.box.gltf.getObjectByName('Object_4').clone();
-        mesh.scale.set(0.6,0.6,0.6);
+        mesh.scale.set(0.4,0.4,0.4);
         
         enemy.add(mesh);
         
@@ -264,7 +275,7 @@ function init(){
 function initPlayerSkeleton(){
 	
 	player.traverse( b =>  {
-		if (b.isBone && b.name === 'spine_01_128') { 
+		if (b.isBone && b.name === 'root_152') { 
 			playerBones.torso = b;
 		}
 		if (b.isBone && b.name === 'hip_r_150') { 
@@ -334,21 +345,30 @@ function animate() {
 	
 	if (keyboard['KeyW']) {
 		player.position.z += 0.1;
+		if(playerBones.torso.rotation.y != 0) playerBones.torso.rotation.y=0;
+		if(playerMask) mask.position.z +=0.1;
 		TWEEN.update();		
 	}
 	if (keyboard['KeyS']) {
 		if (player.position.z > minZ) {
 			player.position.z -= 0.1;
+			playerBones.torso.rotation.y = (Math.PI );
+			
+			if(playerMask) mask.position.z -=0.1;
 		}
 	}
 	if (keyboard['KeyA']) {
 		if (player.position.x < maxX) {
 			player.position.x += 0.1;
+			playerBones.torso.rotation.y = (Math.PI /2);
+			if(playerMask) mask.position.x +=0.1;
 		}
 	}
 	if (keyboard['KeyD']) {
 		if (player.position.x > minX) {
 			player.position.x -= 0.1;
+			playerBones.torso.rotation.y = (-Math.PI /2);
+			if(playerMask) mask.position.x -=0.1;
 		}
 	}
 	if (keyboard['Space'] && !isJumping){
