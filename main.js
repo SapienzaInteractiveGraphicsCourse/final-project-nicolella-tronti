@@ -224,6 +224,7 @@ function init(){
         keyboard[event.code] = false;
     });
 	playBackMusic();
+	playRunAnimation();
     // Lighting
 	const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
 	scene.add(ambientLight);
@@ -240,7 +241,6 @@ function init(){
 	directLight.shadow.mapSize.width = 512;
 	directLight.shadow.mapSize.height = 512;
 
-	const d = 60;
 	directLight.shadow.camera.left = -10;
 	directLight.shadow.camera.right = 10;
 	directLight.shadow.camera.top = 140;
@@ -334,6 +334,7 @@ function animate() {
 	
 	if (keyboard['KeyW']) {
 		player.position.z += 0.1;
+		TWEEN.update();		
 	}
 	if (keyboard['KeyS']) {
 		if (player.position.z > minZ) {
@@ -494,3 +495,98 @@ function playBoxSound(){
 	sound.play();
 }
 
+function playRunAnimation(){
+
+	let step_time= 500;
+
+	let leg_up_max_angle = 35;
+	let arm_max_angle = 45;
+	
+	playerBones.rightUpperLeg.rotation.z =rad(0);	
+
+	playerBones.leftLowerArm.rotation.z = rad(-45);
+	playerBones.rightLowerArm.rotation.z = rad(45);
+
+	var leg_up_start = {z: 0};
+	var leg_up_tween_start = new TWEEN.Tween(leg_up_start)
+	.to({z:-leg_up_max_angle}, step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.onUpdate(
+		() => {
+			playerBones.leftUpperLeg.rotation.z = rad(180 - leg_up_start.z);
+			playerBones.rightUpperLeg.rotation.z = rad(50 - leg_up_start.z);
+			playerBones.leftUpperArm.rotation.z = rad(-50 - leg_up_start.z);
+			playerBones.rightUpperArm.rotation.z = rad(50 - leg_up_start.z);
+		}
+	);
+
+	var leg_up_end = {z: -leg_up_max_angle};
+	var leg_up_tween_end = new TWEEN.Tween(leg_up_end)
+	.to({z:45+leg_up_max_angle},step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.onUpdate(
+		() => {
+			playerBones.leftUpperLeg.rotation.z = rad(180 - leg_up_end.z);
+			playerBones.rightUpperLeg.rotation.z = rad(50 - leg_up_end.z);
+			playerBones.leftUpperArm.rotation.z = rad(-50 - leg_up_end.z);
+			playerBones.rightUpperArm.rotation.z = rad(50 - leg_up_end.z);
+		}
+	);
+	var leg2_up_end = {z: 45+ leg_up_max_angle};
+	var leg2_up_tween_end = new TWEEN.Tween(leg2_up_end)
+	.to({z:0},step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.onUpdate(
+		() => {
+			playerBones.leftUpperLeg.rotation.z = rad(180 - leg2_up_end.z);
+			playerBones.rightUpperLeg.rotation.z = rad(50 - leg2_up_end.z);
+			playerBones.leftUpperArm.rotation.z = rad(-50 - leg2_up_end.z);
+			playerBones.rightUpperArm.rotation.z = rad(50 - leg2_up_end.z);
+		}
+	);
+
+
+	/*var arm_start = {z : 0};
+	var arm_tween_start = new TWEEN.Tween(arm_start)
+	.to({z: -arm_max_angle},step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.onUpdate(
+		() => {
+			playerBones.leftUpperArm.rotation.z = - rad(40 - arm_start.z);
+			playerBones.rightUpperArm.rotation.z =rad(50 - arm_start.z);
+
+		}
+	);
+
+	var arm_end = {z : arm_max_angle};
+	var arm_tween_end = new TWEEN.Tween(arm_end)
+	.to({z: 45-arm_max_angle},step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.onUpdate(
+		() => {
+			playerBones.leftUpperArm.rotation.z = -rad(40 - arm_end.z);
+			playerBones.rightUpperArm.rotation.z =rad(50 - arm_end.z);
+
+		}
+	);*/
+
+	leg_up_tween_start.onComplete(()=>{leg_up_tween_end.start();});
+	leg_up_tween_end.onComplete(()=>{leg2_up_tween_end.start();});
+	leg2_up_tween_end.onComplete(()=>{leg_up_tween_start.start();});
+
+
+	//arm_tween_start.chain(arm_tween_end);
+	//arm_tween_end.chain(arm_tween_start);
+
+	//arm_tween_start.start();
+	//arm_tween_end.start();
+	leg_up_tween_start.start();
+	leg_up_tween_end.start();
+	leg2_up_tween_end.start();
+
+	//runTweens.push(arm_tween_start);
+	//runTweens.push(arm_tween_end);
+	runTweens.push(leg_up_tween_start);
+	runTweens.push(leg_up_tween_end);
+	runTweens.push(leg2_up_tween_end);
+}
