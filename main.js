@@ -5,9 +5,9 @@ import TWEEN from './libs/tween.esm.js';
 
 const models = {
 	crash:    { url: './assets/crash4.glb' },
-	aku_aku:  { url: './assets/aku_aku.glb'},
+	aku_aku:  { url: './assets/aku_aku2.glb'},
 	box:  { url: './assets/box.glb'},
-	//jump_box:  { url: './assets/jump_box.glb'},
+	aku_box:  { url: './assets/aku_box1.glb'},
 	//tnt:  { url: './assets/tnt.glb'},
 	wumpa:  { url: './assets/wumpa_fruit.glb'},
 	//rock_sphere:  { url: './assets/rock_sphere.glb'},
@@ -24,7 +24,8 @@ const sounds = {
 	box2:	{url: './sounds/S0000003.NSF_00015.wav'},
 	enemy:	{url: './sounds/S0000003.NSF_00044.wav'},
 	tnt:	{url: './sounds/S0000003.NSF_00060.wav'},
-	life:	{url: './sounds/S0000003.NSF_00005.wav'}
+	life:	{url: './sounds/S0000003.NSF_00005.wav'},
+	akuaku: {url: './sounds/akuaku.wav'}
 };
 
 
@@ -32,7 +33,7 @@ var keyboard = {};
 var scene;
 var camera,player, mask;
 var playerBones = {};
-var enemies,collectibles;
+var enemies,collectibles, akuboxes;
 var score;
 var renderer;
 var scoreElement;
@@ -47,11 +48,10 @@ var minX = -1.5;
 var maxX = 1.5;
 var minZ = 3;
 var health =1;
-var playerMask = 1;
+var playerMask = 0;
 var modelsOK = 0,soundsOK = 0;
-var backgroundSound, sound, listener, audioLoader;
+var backgroundSound, sound, listener, audioLoader, sound2;
 var runTweens = [];
-var wumpaTween;
 var water;
 
 
@@ -138,6 +138,7 @@ function init(){
 	camera.add(listener);
 
 	sound = new THREE.Audio(listener);
+	sound2 = new THREE.Audio(listener);
 	backgroundSound = new THREE.Audio(listener);
 	//SkyBox
 	var materialArray = [];
@@ -190,15 +191,16 @@ function init(){
 
 	//Aku aku
 	mask = new THREE.Mesh();
-	var bodymask = models.aku_aku.gltf.getObjectByName('Aku_akupCube7');
+	var bodymask = models.aku_aku.gltf.getObjectByName('RootNode');
 	mask.add(bodymask);
-	mask.position.set(player.position.x -1, player.position.y+1 , player.position.z);
-	mask.rotation.y = (-Math.PI /2);
-	mask.scale.set(0.1,0.1,0.1);
+	mask.position.set(0, -5, 0);
+	mask.scale.set(0.05,0.05,0.05);
 	scene.add(mask);
-
+	
+	
     // Enemies
     enemies = [];
+
     for (let i = 0; i < 5; i++) {
         
         const enemy = new THREE.Mesh();
@@ -207,22 +209,35 @@ function init(){
         
         enemy.add(mesh);
         
-        enemy.position.set(Math.random() * 10 - 5, 0, Math.random() * 10 - 5);
+        enemy.position.set(randomIntFromInterval(-1,1), 0.5, randomIntFromInterval(4,255));
         
 		scene.add(enemy);
         enemies.push(enemy);
     }
 
+	// Akuboxes
+	akuboxes = [];
+	for (let i = 0; i < 3; i++) {
+        
+		const akubox = new THREE.Mesh();
+		var bodyakubox = models.aku_box.gltf.getObjectByName('Sketchfab_model').clone();
+		akubox.add(bodyakubox);
+		akubox.position.set(randomIntFromInterval(-1,1), 0.5, randomIntFromInterval(4,255));
+		akubox.scale.set(0.5,0.5,0.5);
+		scene.add(akubox);
+		akuboxes.push(akubox);
+    }
+
     // Collectibles
     collectibles = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 100; i++) {
         
         const collectible = new THREE.Mesh();  
         var mesh = models.wumpa.gltf.getObjectByName('Sketchfab_model').clone();
 		mesh.scale.set(0.05,0.05,0.05);
         collectible.add(mesh);
 
-        collectible.position.set(Math.random() * 10 - 5, 0, Math.random() * 10 - 5);
+        collectible.position.set(randomIntFromInterval(-1,1),0.5, randomIntFromInterval(4,255));
         scene.add(collectible);
         collectibles.push(collectible);
     }
@@ -325,24 +340,11 @@ function checkCollision(object1, object2){
 	
 	return box1.intersectsBox(box2);
 }
-function checkCollisionPlayer(player, enemy) {
-	const playerBox = new THREE.Box3().setFromObject(player);
-	const enemyBox = new THREE.Box3().setFromObject(enemy);
-  
-	// Get the top position of the enemy
-	const enemyTop = enemy.position.y + enemyBox.max.y;
-  
-	// Check if the player's position is above the top of the enemy
-	return (
-	  playerBox.min.y <= enemyTop &&
-	  playerBox.max.y >= enemyTop &&
-	  playerBox.intersectsBox(enemyBox)
-	);
-  }
+
 // Game loop
 function animate() {
 	requestAnimationFrame(animate);
-	
+	if(playerMask) mask.position.set(player.position.x -1, player.position.y+1 , player.position.z);
 	if (keyboard['KeyW']) {
 		player.position.z += 0.1;
 		if(playerBones.torso.rotation.y != 0) playerBones.torso.rotation.y=0;
@@ -353,7 +355,7 @@ function animate() {
 		if (player.position.z > minZ) {
 			player.position.z -= 0.1;
 			playerBones.torso.rotation.y = (Math.PI );
-			
+			if(!keyboard['KeyW']) TWEEN.update();
 			if(playerMask) mask.position.z -=0.1;
 		}
 	}
@@ -361,6 +363,7 @@ function animate() {
 		if (player.position.x < maxX) {
 			player.position.x += 0.1;
 			playerBones.torso.rotation.y = (Math.PI /2);
+			if(!keyboard['KeyW']) TWEEN.update();
 			if(playerMask) mask.position.x +=0.1;
 		}
 	}
@@ -368,6 +371,7 @@ function animate() {
 		if (player.position.x > minX) {
 			player.position.x -= 0.1;
 			playerBones.torso.rotation.y = (-Math.PI /2);
+			if(!keyboard['KeyW']) TWEEN.update();
 			if(playerMask) mask.position.x -=0.1;
 		}
 	}
@@ -390,15 +394,15 @@ function animate() {
 	camera.position.z -= 3;
 	camera.lookAt(player.position);
 
+	
 	// Update game logic
 	for (let i = 0; i < enemies.length; i++) {
 		const enemy = enemies[i];
 		
-		if (checkCollisionPlayer(player, enemy)) {
+		if (checkCollision(player, enemy)) {
 			const playerBottom = player.position.y - (playerBones.torso ? playerBones.torso.position.y : 0);
-			
 			// Check if the player's bottom position is above the enemy's top
-			if (playerBottom >= enemy.position.y) {
+			if (playerBottom >= enemy.position.y && isJumping) {
 			  // Remove the box from the scene
 			  playBoxSound();
 			  scene.remove(enemy);
@@ -416,6 +420,7 @@ function animate() {
 			  // Increase the score and health
 			  score+=5;
 			  if(score >=15){
+				playHealthSound();
 				health++;
 				document.getElementById('health').textContent =health;
 				score=0;
@@ -424,15 +429,19 @@ function animate() {
 			}else{
 			if (keyboard['KeyW']) {
 				player.position.z -= 0.1;
+				if(playerMask) mask.position.z -=0.1;
 			}
 			if (keyboard['KeyS']) {
 				player.position.z += 0.1;
+				if(playerMask) mask.position.z +=0.1;
 			}
 			if (keyboard['KeyA']) {
 				player.position.x -= 0.1;
+				if(playerMask) mask.position.x -=0.1;
 			}
 			if (keyboard['KeyD']) {
 				player.position.x += 0.1;
+				if(playerMask) mask.position.x +=0.1;
 			}
 			camera.position.copy(player.position);
 			camera.position.y += 2;
@@ -441,8 +450,58 @@ function animate() {
 		}	
 		}
 	}
+
+	for (let i = 0; i < akuboxes.length; i++) {
+		const akubox = akuboxes[i];
+		
+		if (checkCollision(player, akubox)) {
+			const playerBottom = player.position.y - (playerBones.torso ? playerBones.torso.position.y : 0);
+			// Check if the player's bottom position is above the enemy's top
+			if (playerBottom >= akubox.position.y && isJumping) {
+			  // Remove the box from the scene
+			  playMaskSound();
+			  scene.remove(akubox);
+			  akuboxes.splice(i, 1);
+			  i--;
+			  isJumping = true;
+			  jumpDir = 1;
+			  player.position.y += jumpDir * jumpSpeed;
+			  if(player.position.y >= jumpBoxHeight){
+				  jumpDir = -1;
+			  } else if (player.position.y <= 0){
+				  isJumping = false;
+				  player.position.y = 0.0;
+			  }
+			  // Increase the score and health
+			  playerMask = 1;
+			}else{
+				if (keyboard['KeyW']) {
+					player.position.z -= 0.1;
+					if(playerMask) mask.position.z -=0.1;
+				}
+				if (keyboard['KeyS']) {
+					player.position.z += 0.1;
+					if(playerMask) mask.position.z +=0.1;
+				}
+				if (keyboard['KeyA']) {
+					player.position.x -= 0.1;
+					if(playerMask) mask.position.x -=0.1;
+				}
+				if (keyboard['KeyD']) {
+					player.position.x += 0.1;
+					if(playerMask) mask.position.x +=0.1;
+				}
+			camera.position.copy(player.position);
+			camera.position.y += 2;
+			camera.position.z -= 3;
+			camera.lookAt(player.position);
+		}	
+		}
+	}
+
 	for (let i = 0; i < collectibles.length; i++) {
 		const collectible = collectibles[i];
+		collectible.rotation.y += 0.05;
 		if (checkCollision(player, collectible)) {
 			// Collectible logic
 			playWumpaSound();
@@ -450,6 +509,7 @@ function animate() {
 			collectibles.splice(i, 1);
 			score++;
 			if(score >=15){
+				playHealthSound();
 				health++;
 				document.getElementById('health').textContent =health;
 				score=0;
@@ -504,15 +564,27 @@ function playBackMusic(){
 function playWumpaSound(){
 	sound.isPlaying = false;
 	sound.setBuffer(sounds.wumpa.sound);
-	sound.setVolume(0.3);
+	sound.setVolume(0.15);
 	sound.play();
 }
 
 function playBoxSound(){
 	sound.isPlaying = false;
 	sound.setBuffer(sounds.box1.sound);
-	sound.setVolume(0.6);
+	sound.setVolume(0.4);
 	sound.play();
+}
+function playHealthSound(){
+	sound.isPlaying = false;
+	sound.setBuffer(sounds.life.sound);
+	sound.setVolume(0.4);
+	sound.play();
+}
+function playMaskSound(){
+	sound2.isPlaying = false;
+	sound2.setBuffer(sounds.akuaku.sound);
+	sound2.setVolume(3.0);
+	sound2.play();
 }
 
 function playRunAnimation(){
@@ -566,47 +638,19 @@ function playRunAnimation(){
 	);
 
 
-	/*var arm_start = {z : 0};
-	var arm_tween_start = new TWEEN.Tween(arm_start)
-	.to({z: -arm_max_angle},step_time)
-	.easing(TWEEN.Easing.Quadratic.Out)
-	.onUpdate(
-		() => {
-			playerBones.leftUpperArm.rotation.z = - rad(40 - arm_start.z);
-			playerBones.rightUpperArm.rotation.z =rad(50 - arm_start.z);
-
-		}
-	);
-
-	var arm_end = {z : arm_max_angle};
-	var arm_tween_end = new TWEEN.Tween(arm_end)
-	.to({z: 45-arm_max_angle},step_time)
-	.easing(TWEEN.Easing.Quadratic.Out)
-	.onUpdate(
-		() => {
-			playerBones.leftUpperArm.rotation.z = -rad(40 - arm_end.z);
-			playerBones.rightUpperArm.rotation.z =rad(50 - arm_end.z);
-
-		}
-	);*/
-
 	leg_up_tween_start.onComplete(()=>{leg_up_tween_end.start();});
 	leg_up_tween_end.onComplete(()=>{leg2_up_tween_end.start();});
 	leg2_up_tween_end.onComplete(()=>{leg_up_tween_start.start();});
 
-
-	//arm_tween_start.chain(arm_tween_end);
-	//arm_tween_end.chain(arm_tween_start);
-
-	//arm_tween_start.start();
-	//arm_tween_end.start();
 	leg_up_tween_start.start();
 	leg_up_tween_end.start();
 	leg2_up_tween_end.start();
 
-	//runTweens.push(arm_tween_start);
-	//runTweens.push(arm_tween_end);
 	runTweens.push(leg_up_tween_start);
 	runTweens.push(leg_up_tween_end);
 	runTweens.push(leg2_up_tween_end);
 }
+
+function randomIntFromInterval(min, max) { // min and max included 
+	return Math.floor(Math.random() * (max - min + 1) + min)
+  }
