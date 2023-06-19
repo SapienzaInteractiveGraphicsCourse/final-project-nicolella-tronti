@@ -11,7 +11,9 @@ const models = {
 	//tnt:  { url: './assets/tnt.glb'},
 	wumpa:  { url: './assets/wumpa_fruit.glb'},
 	//rock_sphere:  { url: './assets/rock_sphere.glb'},
-	mappirate: {url: './assets/game_pirate_adventure_map.glb'}
+	mappirate: {url: './assets/game_pirate_adventure_map.glb'},
+	
+	spike:	{url:	'./assets/spikes.glb'}
 };
 
 const sounds = {
@@ -33,7 +35,7 @@ var keyboard = {};
 var scene;
 var camera,player, mask;
 var playerBones = {};
-var enemies,collectibles, akuboxes;
+var enemies,collectibles, akuboxes, spikes;
 var score;
 var renderer;
 var scoreElement;
@@ -76,7 +78,7 @@ function loadModels() {
 		for (const model of Object.values(models)) {
 			gltfLoader.load(model.url, (gltf) => {
 				
-				//console.log();
+				console.log(model);
 				
 				gltf.scene.traverse( function ( child ) {
 
@@ -196,6 +198,28 @@ function init(){
 	mask.position.set(0, -5, 0);
 	mask.scale.set(0.05,0.05,0.05);
 	scene.add(mask);
+	
+	//Spikes
+	spikes = [];
+	
+	
+    for (let i = 0; i < 5; i++) {
+        
+        const spike = new THREE.Mesh();
+        var mesh = models.spike.gltf.getObjectByName('RootNode').clone();
+        mesh.scale.set(0.021,0.016,0.021);
+       
+        
+        spike.add(mesh);
+        const box1 = new THREE.Box3().setFromObject(spike);
+        var dim = new THREE.Vector3();
+        box1.getSize(dim);
+        console.log(dim);
+        spike.position.set(randomIntFromInterval(-1,1), -0.03, randomIntFromInterval(4,255));
+        
+		scene.add(spike);
+        spikes.push(spike);
+    }
 	
 	
     // Enemies
@@ -393,6 +417,32 @@ function animate() {
 	camera.position.y += 2;
 	camera.position.z -= 3;
 	camera.lookAt(player.position);
+	
+	// Update game logic
+	//Check collisions with spikes
+	for (let i = 0; i < spikes.length; i++) {
+		const spike = spikes[i];
+		
+		if (checkCollision(player, spike)) {
+			
+			  isJumping = true;
+			  jumpDir = 1;
+			  player.position.y += jumpDir * jumpSpeed;
+			  player.position.z +=1.7;
+			  // Decrease the score and health
+			  health--;
+			  if(health == 0){
+				  //implement game over logic
+				 alert("game over");
+			  }
+			  document.getElementById('health').textContent =health;
+			camera.position.copy(player.position);
+			camera.position.y += 2;
+			camera.position.z -= 3;
+			camera.lookAt(player.position);
+			
+		}
+	}
 
 	
 	// Update game logic
