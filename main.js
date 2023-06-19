@@ -207,15 +207,17 @@ function init(){
         
         const spike = new THREE.Mesh();
         var mesh = models.spike.gltf.getObjectByName('RootNode').clone();
-        mesh.scale.set(0.021,0.016,0.021);
+        mesh.scale.set(0.021,0.010,0.017);
+        mesh.rotation.x = (Math.PI);
        
         
         spike.add(mesh);
+        spike.name = "spike";
         const box1 = new THREE.Box3().setFromObject(spike);
         var dim = new THREE.Vector3();
         box1.getSize(dim);
         console.log(dim);
-        spike.position.set(randomIntFromInterval(-1,1), -0.03, randomIntFromInterval(4,255));
+        spike.position.set(randomIntFromInterval(-1,1), 0, randomIntFromInterval(4,255));
         
 		scene.add(spike);
         spikes.push(spike);
@@ -244,6 +246,7 @@ function init(){
 	for (let i = 0; i < 3; i++) {
         
 		const akubox = new THREE.Mesh();
+		akubox.name = "aku";
 		var bodyakubox = models.aku_box.gltf.getObjectByName('Sketchfab_model').clone();
 		akubox.add(bodyakubox);
 		akubox.position.set(randomIntFromInterval(-1,1), 0.5, randomIntFromInterval(4,255));
@@ -362,6 +365,15 @@ function checkCollision(object1, object2){
 	const box1 = new THREE.Box3().setFromObject(object1);
 	const box2 = new THREE.Box3().setFromObject(object2);
 	
+	box1.expandByScalar(-0.15);
+	box2.expandByScalar(-0.08);
+	
+
+	if(object2.name == "spike"){
+		box2.expandByScalar(-0.55);
+	}
+	
+	
 	return box1.intersectsBox(box2);
 }
 
@@ -422,25 +434,31 @@ function animate() {
 	//Check collisions with spikes
 	for (let i = 0; i < spikes.length; i++) {
 		const spike = spikes[i];
-		
+
 		if (checkCollision(player, spike)) {
-			
-			  isJumping = true;
-			  jumpDir = 1;
-			  player.position.y += jumpDir * jumpSpeed;
-			  player.position.z +=1.7;
-			  // Decrease the score and health
-			  health--;
-			  if(health == 0){
-				  //implement game over logic
-				 alert("game over");
-			  }
-			  document.getElementById('health').textContent =health;
+
+			isJumping = true;
+			jumpDir = 1;
+			player.position.y += jumpDir * jumpSpeed;
+			player.position.z +=2.5;
+
+			// Decrease the score and health
+			if(playerMask){
+				playerMask = 0;
+			}else{
+				health--;
+				if(health == 0){
+				//implement game over logic
+					alert("game over");
+				}
+			}		
+
+			document.getElementById('health').textContent =health;
 			camera.position.copy(player.position);
 			camera.position.y += 2;
 			camera.position.z -= 3;
 			camera.lookAt(player.position);
-			
+
 		}
 	}
 
