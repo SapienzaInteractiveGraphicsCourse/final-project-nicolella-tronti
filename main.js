@@ -27,7 +27,8 @@ const sounds = {
 	enemy:	{url: './sounds/S0000003.NSF_00044.wav'},
 	tnt:	{url: './sounds/S0000003.NSF_00060.wav'},
 	life:	{url: './sounds/S0000003.NSF_00005.wav'},
-	akuaku: {url: './sounds/akuaku.wav'}
+	akuaku: {url: './sounds/akuaku.wav'},
+	woa: 	{url: './sounds/woa.mp3'}
 };
 
 
@@ -436,7 +437,7 @@ function animate() {
 		const spike = spikes[i];
 
 		if (checkCollision(player, spike)) {
-
+			playWoaSound();
 			isJumping = true;
 			jumpDir = 1;
 			player.position.y += jumpDir * jumpSpeed;
@@ -635,7 +636,12 @@ function playWumpaSound(){
 	sound.setVolume(0.15);
 	sound.play();
 }
-
+function playWoaSound(){
+	sound.isPlaying = false;
+	sound.setBuffer(sounds.woa.sound);
+	sound.setVolume(0.4);
+	sound.play();
+}
 function playBoxSound(){
 	sound.isPlaying = false;
 	sound.setBuffer(sounds.box1.sound);
