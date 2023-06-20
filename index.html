@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Three.js Game</title>
+    <title>Crash Three JS</title>
     <style>
         @font-face {
             font-family: 'CrashBand';
@@ -11,6 +11,11 @@
         *{
             font-family: 'CrashBand';
             color: orange;
+            text-shadow:
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000; 
         }
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
@@ -33,10 +38,66 @@
         #score_box h2{
             font-size: 30px;
         }
+        img{
+            max-width: 100%;
+            max-height: 100%;
+        }
+        #credits{
+            position: absolute;
+            display: flex;
+            bottom: 2px;
+        }
+        #loadings{
+            position: absolute;
+        }
+        #entertoplay{
+            position: absolute;
+            top: 370px;
+            left: 500px;
+        }
     </style>
 </head>
 <body>
-    <div id="score_box">
+    <div id="loadings">
+
+        <div id="models_loading">
+            <div>
+              <div>Loading Models</div>
+              <div class="progress"><div id="models_progressbar"></div></div>
+            </div>
+        </div>
+        <br></br>
+        <div id="sounds_loading">
+            <div>
+              <div>Loading Sounds</div>
+              <div class="progress"><div id="sounds_progressbar"></div></div>
+            </div>
+        </div>	
+        
+    </div>
+
+    <div id="container">
+    <div id="main_menu">
+        <img src="./assets/splash.jpg"></img>
+        <div id="entertoplay" hidden>
+            <p >Press <b>Enter</b> to start play!</p>
+        </div>       
+        <div id="credits">
+            <p>
+                <b>Interactive Graphics AA 2022/2023 - Final Project</b><br>
+                Michelangelo Tronti-Alessandro Nicolella
+            </p>
+        </div>
+    </div>
+    <div id="game_pause" hidden>
+        <h1>Game Paused</h1>
+        <p>Press <b>Esc</b> to resume.</p>
+    </div>
+    <div id="game_over" hidden>
+        <h1>GAME OVER</h1>
+        <p>Press <b>F5</b> or <b>reload the page</b> to restart the game.</p>
+    </div>
+    <div id="score_box" hidden>
         <div class="Row">
             <div class="Column">
                 <img src="./texture/health.png" width="50" height="50"></img>
@@ -47,6 +108,7 @@
                 <h2 id="fruits">0</h2>
             </div>
         </div>
+    </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
     <script type="module" src="main.js"></script>

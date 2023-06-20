@@ -1,5 +1,6 @@
 import * as THREE from './libs/threejs/build/three.module.js';
 import { GLTFLoader } from './libs/threejs/examples/jsm/loaders/GLTFLoader.js';
+import { GUI } from './libs/threejs/examples/jsm/libs/dat.gui.module.js';
 import TWEEN from './libs/tween.esm.js';
 // Scene params
 
@@ -56,7 +57,7 @@ var modelsOK = 0,soundsOK = 0;
 var backgroundSound, sound, listener, audioLoader, sound2;
 var runTweens = [];
 var water;
-
+var gamePause=1;
 
 loadModels();
 loadSounds();
@@ -68,11 +69,18 @@ function loadModels() {
 	modelsLoaderManager.onLoad = () => {
 		
 		modelsOK = 1;
+		document.querySelector('#models_loading').hidden = true;
 		
 		if(modelsOK && soundsOK){
+			document.querySelector('#entertoplay').hidden = false;
 			init();
 			
 		}
+	};
+	const modelsProgressBar = document.querySelector('#models_progressbar');
+	modelsLoaderManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+		console.log("Loading models... ", itemsLoaded / itemsTotal * 100, '%');
+		modelsProgressBar.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
 	};
 	{
 		const gltfLoader = new GLTFLoader(modelsLoaderManager);
@@ -107,13 +115,18 @@ function loadSounds() {
 	soundsLoaderManager.onLoad = () => {
 
 		soundsOK = 1;
-
-
+		document.querySelector('#sounds_loading').hidden = true;
+		
 		if(modelsOK && soundsOK) {
+			document.querySelector('#entertoplay').hidden = false;
 			init();
 		}
 	};
-
+	const modelsProgressBar = document.querySelector('#sounds_progressbar');
+	soundsLoaderManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+		console.log("Loading sounds... ", itemsLoaded / itemsTotal * 100, '%');
+		modelsProgressBar.style.width = `${itemsLoaded / itemsTotal * 100 | 0}%`;
+	};
 	{
 		const audioLoader = new THREE.AudioLoader(soundsLoaderManager);
 		for (const sound of Object.values(sounds)) {
@@ -128,7 +141,7 @@ function loadSounds() {
 }
 
 
-
+const container = document.getElementById( 'container' )
 
 
 function init(){
@@ -271,12 +284,12 @@ function init(){
     }
 
     // User interaction
-    document.addEventListener('keydown', function(event) {
-        keyboard[event.code] = true;
-    });
-    document.addEventListener('keyup', function(event) {
-        keyboard[event.code] = false;
-    });
+		document.addEventListener('keydown', function(event) {
+			keyboard[event.code] = true;
+		});
+		document.addEventListener('keyup', function(event) {
+			keyboard[event.code] = false;
+		});
 	playBackMusic();
 	playRunAnimation();
     // Lighting
@@ -381,6 +394,8 @@ function checkCollision(object1, object2){
 // Game loop
 function animate() {
 	requestAnimationFrame(animate);
+	if(keyboard['Enter']) startGame();
+	else{
 	if(playerMask) mask.position.set(player.position.x -1, player.position.y+1 , player.position.z);
 	if (keyboard['KeyW']) {
 		player.position.z += 0.1;
@@ -424,6 +439,7 @@ function animate() {
 			isJumping = false;
 			player.position.y = 0.0;
 		}
+	}
 	}
 	// Update camera position
 	camera.position.copy(player.position);
@@ -728,3 +744,8 @@ function playRunAnimation(){
 function randomIntFromInterval(min, max) { // min and max included 
 	return Math.floor(Math.random() * (max - min + 1) + min)
   }
+function startGame(){
+	document.getElementById("main_menu").hidden = true;
+	document.getElementById("score_box").hidden = false;
+	gamePause=0;
+}
