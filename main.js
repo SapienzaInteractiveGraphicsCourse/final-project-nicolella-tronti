@@ -30,6 +30,7 @@ const sounds = {
 	tnt:	{url: './sounds/S0000003.NSF_00060.wav'},
 	life:	{url: './sounds/S0000003.NSF_00005.wav'},
 	akuaku: {url: './sounds/akuaku.wav'},
+	seasound: {url: './sounds/S000000F.NSF_00056.wav'},
 	woa: 	{url: './sounds/woa.mp3'}
 };
 
@@ -58,7 +59,7 @@ var maxZ = 232;
 var health =1;
 var playerMask = 0;
 var modelsOK = 0,soundsOK = 0;
-var backgroundSound, sound, listener, audioLoader, sound2;
+var backgroundSound, sound, listener, audioLoader, sound2,sound3;
 var runTweens = [];
 var water;
 var gamePause=1;
@@ -172,6 +173,7 @@ function init(){
 
 	sound = new THREE.Audio(listener);
 	sound2 = new THREE.Audio(listener);
+	sound3 = new THREE.Audio(listener);
 	backgroundSound = new THREE.Audio(listener);
 	//SkyBox
 	var materialArray = [];
@@ -343,7 +345,7 @@ function init(){
 		document.addEventListener('keyup', function(event) {
 			keyboard[event.code] = false;
 		});
-	playBackMusic();
+	
 	playRunAnimation();
     // Lighting
 	const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
@@ -450,8 +452,10 @@ function checkCollision(object1, object2){
 // Game loop
 function animate() {
 	requestAnimationFrame(animate);
-	console.log(playerBones.leftUpperLeg.rotation.z);
-	console.log(playerBones.rightUpperLeg.rotation.z);
+	
+	sound3.setVolume(player.position.z/2000);
+	
+	
 	if(keyboard['Enter'] && gamePause) startGame();
 	else{
 	if(!gameOverFlag){
@@ -795,6 +799,13 @@ function playHealthSound(){
 	sound.setVolume(0.4);
 	sound.play();
 }
+function playSeaSound(){
+	sound3.isPlaying = false;
+	sound3.setBuffer(sounds.seasound.sound);
+	sound3.setLoop(true);
+	sound3.setVolume(0.002);
+	sound3.play();
+}
 function playMaskSound(){
 	sound2.isPlaying = false;
 	sound2.setBuffer(sounds.akuaku.sound);
@@ -886,6 +897,8 @@ function randomIntFromInterval(min, max) { // min and max included
 function startGame(){
 	document.getElementById("main_menu").hidden = true;
 	document.getElementById("score_box").hidden = false;
+	playBackMusic();
+	playSeaSound();
 	gamePause=0;
 }
 function gameOver(){
