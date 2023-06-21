@@ -1,6 +1,5 @@
 import * as THREE from './libs/threejs/build/three.module.js';
 import { GLTFLoader } from './libs/threejs/examples/jsm/loaders/GLTFLoader.js';
-import { GUI } from './libs/threejs/examples/jsm/libs/dat.gui.module.js';
 import TWEEN from './libs/tween.esm.js';
 // Scene params
 
@@ -39,6 +38,7 @@ var camera,player, mask;
 var playerBones = {};
 var enemies,collectibles, akuboxes, spikes;
 var score;
+var totalscore;
 var renderer;
 var scoreElement;
 var gameOverFlag =0;
@@ -52,6 +52,7 @@ var map;
 var minX = -1.5;
 var maxX = 1.5;
 var minZ = 3;
+var maxZ = 230;
 var health =1;
 var playerMask = 0;
 var modelsOK = 0,soundsOK = 0;
@@ -157,9 +158,6 @@ function loadSounds() {
 }
 
 
-const container = document.getElementById( 'container' )
-
-
 function init(){
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -247,7 +245,7 @@ function init(){
         var dim = new THREE.Vector3();
         box1.getSize(dim);
         console.log(dim);
-        spike.position.set(randomIntFromInterval(-1,1), 0, randomIntFromInterval(4,255));
+        spike.position.set(randomIntFromInterval(-1,1), 0, randomIntFromInterval(6,230));
         
 		scene.add(spike);
         spikes.push(spike);
@@ -265,7 +263,7 @@ function init(){
         
         enemy.add(mesh);
         
-        enemy.position.set(randomIntFromInterval(-1,1), 0.5, randomIntFromInterval(4,255));
+        enemy.position.set(randomIntFromInterval(-1,1), 0.5, randomIntFromInterval(6,230));
         
 		scene.add(enemy);
         enemies.push(enemy);
@@ -279,7 +277,7 @@ function init(){
 		akubox.name = "aku";
 		var bodyakubox = models.aku_box.gltf.getObjectByName('Sketchfab_model').clone();
 		akubox.add(bodyakubox);
-		akubox.position.set(randomIntFromInterval(-1,1), 0.5, randomIntFromInterval(4,255));
+		akubox.position.set(randomIntFromInterval(-1,1), 0.5, randomIntFromInterval(6,230));
 		akubox.scale.set(0.5,0.5,0.5);
 		scene.add(akubox);
 		akuboxes.push(akubox);
@@ -294,7 +292,7 @@ function init(){
 		mesh.scale.set(0.05,0.05,0.05);
         collectible.add(mesh);
 
-        collectible.position.set(randomIntFromInterval(-1,1),0.5, randomIntFromInterval(4,255));
+        collectible.position.set(randomIntFromInterval(-1,1),0.5, randomIntFromInterval(6,230));
         scene.add(collectible);
         collectibles.push(collectible);
     }
@@ -337,6 +335,7 @@ function init(){
 	
     // Game variables
     score = 0;
+	totalscore=0;
     scoreElement = document.createElement('div');
     document.body.appendChild(scoreElement);
 	
@@ -415,17 +414,25 @@ function animate() {
 	if(!gameOverFlag){
 	if(playerMask) mask.position.set(player.position.x -1, player.position.y+1 , player.position.z);
 	if (keyboard['KeyW']) {
-		player.position.z += 0.1;
-		if(playerBones.torso.rotation.y != 0) playerBones.torso.rotation.y=0;
-		if(playerMask) mask.position.z +=0.1;
-		TWEEN.update();		
+		if(player.position.z < maxZ){
+			player.position.z += 0.1;
+			if(playerBones.torso.rotation.y != 0) {
+				playerBones.torso.rotation.y=0;
+				mask.rotation.y = 0;
+			}
+			if(playerMask) mask.position.z +=0.1;
+			TWEEN.update();
+		}		
 	}
 	if (keyboard['KeyS']) {
 		if (player.position.z > minZ) {
 			player.position.z -= 0.1;
 			playerBones.torso.rotation.y = (Math.PI );
 			if(!keyboard['KeyW']) TWEEN.update();
-			if(playerMask) mask.position.z -=0.1;
+			if(playerMask){
+				mask.position.z -=0.1;
+				mask.rotation.y = Math.PI;
+			}
 		}
 	}
 	if (keyboard['KeyA']) {
@@ -480,11 +487,12 @@ function animate() {
 			// Decrease the score and health
 			if(playerMask){
 				playerMask = 0;
+				mask.position.set(0,-3,0);
 			}else{
 				health--;
 				if(health == 0){
 				//implement game over logic
-					document.getElementById('fruits2').textContent = score;
+					document.getElementById('fruits2').textContent = totalscore;
 					gameOver();
 				}
 			}		
@@ -523,6 +531,7 @@ function animate() {
 			  }
 			  // Increase the score and health
 			  score+=5;
+			  totalscore+=5;
 			  if(score >=15){
 				playHealthSound();
 				health++;
@@ -612,6 +621,7 @@ function animate() {
 			scene.remove(collectible);
 			collectibles.splice(i, 1);
 			score++;
+			totalscore++;
 			if(score >=15){
 				playHealthSound();
 				health++;
