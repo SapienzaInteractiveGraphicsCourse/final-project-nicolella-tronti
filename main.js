@@ -10,8 +10,10 @@ const models = {
 	aku_box:  { url: './assets/aku_box1.glb'},
 	//tnt:  { url: './assets/tnt.glb'},
 	wumpa:  { url: './assets/wumpa_fruit.glb'},
-	//rock_sphere:  { url: './assets/rock_sphere.glb'},
+	rock:  { url: './assets/rock2.glb'},
+	platform:	{url: './assets/platform.glb'},
 	mappirate: {url: './assets/game_pirate_adventure_map.glb'},
+	
 	
 	spike:	{url:	'./assets/spikes.glb'}
 };
@@ -34,9 +36,9 @@ const sounds = {
 
 var keyboard = {};
 var scene;
-var camera,player, mask;
+var camera,player,mask,platform;
 var playerBones = {};
-var enemies,collectibles, akuboxes, spikes;
+var enemies,collectibles, akuboxes, spikes,rocks;
 var score;
 var totalscore;
 var renderer;
@@ -52,7 +54,7 @@ var map;
 var minX = -1.5;
 var maxX = 1.5;
 var minZ = 3;
-var maxZ = 230;
+var maxZ = 232;
 var health =1;
 var playerMask = 0;
 var modelsOK = 0,soundsOK = 0;
@@ -60,6 +62,7 @@ var backgroundSound, sound, listener, audioLoader, sound2;
 var runTweens = [];
 var water;
 var gamePause=1;
+var dir = 1;
 
 loadModels();
 loadSounds();
@@ -197,7 +200,7 @@ function init(){
 	player.name = "crash";
     var body = models.crash.gltf.getObjectByName('Sketchfab_model');
     body.scale.set(2,2, 2);
-	player.position.set(0, 0, 4);
+	player.position.set(0, 0, 230);
     player.add(body);
     initPlayerSkeleton();
     scene.add(player);
@@ -226,6 +229,42 @@ function init(){
 	mask.position.set(0, -5, 0);
 	mask.scale.set(0.05,0.05,0.05);
 	scene.add(mask);
+	
+	//end level platform
+	
+	platform = new THREE.Mesh();
+	var plat = models.platform.gltf.getObjectByName('RootNode');
+	platform.add(plat);
+	platform.position.set(0, 0, 232);
+	platform.scale.set(0.005,0.005,0.005);
+	scene.add(platform);
+	
+	
+	
+	//Rocks
+	rocks = [];
+	
+	
+    for (let i = 0; i < 5; i++) {
+        
+        const rock = new THREE.Mesh();
+        var mesh = models.rock.gltf.getObjectByName('Object_2').clone();
+        //mesh.scale.set(0.021,0.010,0.017);
+        mesh.rotation.x = (Math.PI);
+       
+        
+        rock.add(mesh);
+        rock.name = "rock";
+        const box1 = new THREE.Box3().setFromObject(rock);
+        var dim = new THREE.Vector3();
+        box1.getSize(dim);
+        console.log(dim);
+        rock.position.set(randomIntFromInterval(-1,1), 0.8, randomIntFromInterval(4,200));
+        console.log(rock.position);
+        
+		scene.add(rock);
+        rocks.push(rock);
+    }
 	
 	//Spikes
 	spikes = [];
@@ -401,7 +440,9 @@ function checkCollision(object1, object2){
 	if(object2.name == "spike"){
 		box2.expandByScalar(-0.55);
 	}
-	
+	if(object2.name == "rock"){
+		box2.expandByScalar(-0.55);
+	}
 	
 	return box1.intersectsBox(box2);
 }
@@ -472,7 +513,62 @@ function animate() {
 	camera.position.z -= 3;
 	camera.lookAt(player.position);
 	
+	
 	// Update game logic
+	
+	// check if the player has arrived to the end level platform
+	if (checkCollision(player, platform)) {
+		player.position.y = 0.25;
+		alert("Demo level complete!!!");
+	}
+	
+	//animate and check collison with rocks
+	for (let i = 0; i < rocks.length; i++) {
+		const rock = rocks[i];
+		
+		if(rock.position.x + 0.05 < maxX + 1 && dir == 1){
+			rock.position.x += 0.05;
+			rock.rotation.z -= 0.05;
+		}else{
+			dir = 0;
+		}
+		if(!dir && rock.position.x - 0.05 > -maxX - 1){
+			rock.position.x -= 0.05;
+			rock.rotation.z += 0.05;
+		}else{
+			dir = 1;
+		}
+			 
+
+		if (checkCollision(player, rock)) {
+			playWoaSound();
+			isJumping = true;
+			jumpDir = 1;
+			player.position.y += jumpDir * jumpSpeed;
+			player.position.z +=2.5;
+
+			// Decrease the score and health
+			if(playerMask){
+				playerMask = 0;
+			}else{
+				health--;
+				if(health == 0){
+				//implement game over logic
+					document.getElementById('fruits2').textContent = totalscore;
+					gameOver();
+				}
+			}		
+
+			document.getElementById('health').textContent =health;
+			camera.position.copy(player.position);
+			camera.position.y += 2;
+			camera.position.z -= 3;
+			camera.lookAt(player.position);
+
+		}
+	}
+	
+	
 	//Check collisions with spikes
 	for (let i = 0; i < spikes.length; i++) {
 		const spike = spikes[i];
@@ -507,7 +603,7 @@ function animate() {
 	}
 
 	
-	// Update game logic
+	
 	for (let i = 0; i < enemies.length; i++) {
 		const enemy = enemies[i];
 		
