@@ -62,7 +62,14 @@ var gamePause=1;
 loadModels();
 loadSounds();
 
-
+var blink = document.getElementById("blink");
+setInterval(function () {
+  if (blink.style.opacity == 0) {
+    blink.style.opacity = 1;
+  } else {
+    blink.style.opacity = 0;
+  }
+}, 1000);
 function loadModels() {
 
 	const modelsLoaderManager = new THREE.LoadingManager();
