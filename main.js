@@ -30,7 +30,7 @@ const sounds = {
 	tnt:	{url: './sounds/S0000003.NSF_00060.wav'},
 	life:	{url: './sounds/S0000003.NSF_00005.wav'},
 	akuaku: {url: './sounds/akuaku.wav'},
-	seasound: {url: './sounds/S000000F.NSF_00056.wav'},
+	seasound: {url: './sounds/sea.mp3'},
 	woa: 	{url: './sounds/woa.mp3'}
 };
 
@@ -453,7 +453,7 @@ function checkCollision(object1, object2){
 function animate() {
 	requestAnimationFrame(animate);
 	
-	sound3.setVolume(player.position.z/2000);
+	sound3.setVolume(player.position.z/1000);
 	
 	
 	if(keyboard['Enter'] && gamePause) startGame();
@@ -906,11 +906,13 @@ function gameOver(){
 	document.getElementById("game_over").hidden = false;
 	document.getElementById("score_box").hidden = true;
 	backgroundSound.pause();
+	sound3.pause();
 }
 function gameEnd(){
 	gameOverFlag= 1;
 	document.getElementById("game_over1").hidden = false;
 	document.getElementById("score_box").hidden = true;
 	backgroundSound.pause();
+	sound3.pause();
 }
 
