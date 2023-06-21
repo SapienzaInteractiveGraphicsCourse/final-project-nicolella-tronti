@@ -350,10 +350,10 @@ function init(){
 	scene.add(ambientLight);
 
 	const directLight = new THREE.DirectionalLight(0xaea04b, 3, 100);
-	directLight.position.set(0, 50, player.position.z + 20);
+	directLight.position.set(0, 500, 125);
 	
 	var directLightTargetObject = new THREE.Object3D();
-	directLightTargetObject.position.set(0, 0, player.position.z + 20);
+	directLightTargetObject.position.set(0, 0, 125);
 	scene.add(directLightTargetObject);
 	directLight.target = directLightTargetObject;
 	
@@ -450,6 +450,8 @@ function checkCollision(object1, object2){
 // Game loop
 function animate() {
 	requestAnimationFrame(animate);
+	console.log(playerBones.leftUpperLeg.rotation.z);
+	console.log(playerBones.rightUpperLeg.rotation.z);
 	if(keyboard['Enter'] && gamePause) startGame();
 	else{
 	if(!gameOverFlag){
@@ -497,10 +499,14 @@ function animate() {
 		jumpDir = 1;
 	} 
 	if (isJumping){
+		pauseTweens(runTweens);
+		playJumpAnimation();
 		player.position.y += jumpDir * jumpSpeed;
 		if(player.position.y >= jumpHeight){
 			jumpDir = -1;
 		} else if (player.position.y <= 0){
+			playJumpEndAnimation();
+			resumeTweens(runTweens);
 			isJumping = false;
 			player.position.y = 0.0;
 		}
@@ -526,7 +532,7 @@ function animate() {
 	//animate and check collison with rocks
 	for (let i = 0; i < rocks.length; i++) {
 		const rock = rocks[i];
-		
+		if(!gameOverFlag){
 		if(rock.position.x + 0.05 < maxX + 1 && dir == 1){
 			rock.position.x += 0.05;
 			rock.rotation.z -= 0.05;
@@ -539,7 +545,7 @@ function animate() {
 		}else{
 			dir = 1;
 		}
-			 
+	} 
 
 		if (checkCollision(player, rock)) {
 			playWoaSound();
@@ -739,14 +745,6 @@ function rad(degrees){
 	return degrees * (pi/180);
 }
 
-function stopTweens(tweens) {
-	tweens.forEach( 
-		(tween) => {
-			tween.stop();
-		} 
-	);
-}
-
 function pauseTweens(tweens) {
 	tweens.forEach( 
 		(tween) => {
@@ -865,6 +863,21 @@ function playRunAnimation(){
 	runTweens.push(leg_up_tween_start);
 	runTweens.push(leg_up_tween_end);
 	runTweens.push(leg2_up_tween_end);
+}
+
+function playJumpAnimation(){
+	playerBones.leftUpperArm.rotation.y = rad(-40);
+	playerBones.rightUpperArm.rotation.y = rad(40);
+	playerBones.leftUpperArm.rotation.z = rad(-90);
+	playerBones.rightUpperArm.rotation.z = rad(90);
+	playerBones.leftUpperLeg.rotation.z = -3.0726950651475753;
+	playerBones.rightUpperLeg.rotation.z = 0;
+}
+function playJumpEndAnimation(){
+	playerBones.leftUpperArm.rotation.y = 0.21161608042639796;
+	playerBones.rightUpperArm.rotation.y = -0.21161608042639796;
+	playerBones.leftUpperArm.rotation.z = -0.35863229964530635;
+	playerBones.rightUpperArm.rotation.z = +0.35863229964530635;
 }
 
 function randomIntFromInterval(min, max) { // min and max included 
