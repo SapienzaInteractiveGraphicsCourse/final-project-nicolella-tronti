@@ -52,24 +52,25 @@
         }
         #entertoplay{
             position: absolute;
-            top: 370px;
-            left: 500px;
+            top: 50%;
+            left: 45%;
         }
         #gameOverh1{
             position: absolute;
-            top: 100px;
-            left: 350px;
+            top: 40%;
+            left: 35%;
         }
         #gameOverP{
             position: absolute;
-            top: 200px;
-            left: 400px;
+            top: 45%;
+            left: 37%;
         }
         #fruits2{
             position: absolute;
-            top: 105px;
-            left: 970px;
+            top: 40.5%;
+            left: 67%;
         }
+ 
     </style>
 </head>
 <body>
@@ -104,12 +105,12 @@
             </p>
         </div>
     </div>
-    <div id="game_pause" hidden>
-        <h1>Game Paused</h1>
-        <p>Press <b>Esc</b> to resume.</p>
+    <div id="game_over1" hidden>
+        <h1 id="gameOverh1" style="left: 27%;">LEVEL COMPLETED. Your score is: <h2 id="fruits2"> 0 </h2> </h1>
+        <p id="gameOverP" style="left: 33%;">Press <b>F5</b> or <b>reload the page</b> to restart the game.</p>
     </div>
     <div id="game_over" hidden>
-        <h1 id="gameOverh1">GAME OVER. Your Score is: <h2 id="fruits2"> 0 </h2> </h1>
+        <h1 id="gameOverh1">GAME OVER. Your score is: <h2 id="fruits2"> 0 </h2> </h1>
         <p id="gameOverP">Press <b>F5</b> or <b>reload the page</b> to restart the game.</p>
     </div>
     <div id="score_box" hidden>

@@ -200,7 +200,7 @@ function init(){
 	player.name = "crash";
     var body = models.crash.gltf.getObjectByName('Sketchfab_model');
     body.scale.set(2,2, 2);
-	player.position.set(0, 0, 230);
+	player.position.set(0, 0, 4);
     player.add(body);
     initPlayerSkeleton();
     scene.add(player);
@@ -349,7 +349,7 @@ function init(){
 	const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
 	scene.add(ambientLight);
 
-	const directLight = new THREE.DirectionalLight(0xffffff, 3, 100);
+	const directLight = new THREE.DirectionalLight(0xaea04b, 3, 100);
 	directLight.position.set(0, 50, player.position.z + 20);
 	
 	var directLightTargetObject = new THREE.Object3D();
@@ -519,7 +519,8 @@ function animate() {
 	// check if the player has arrived to the end level platform
 	if (checkCollision(player, platform)) {
 		player.position.y = 0.25;
-		alert("Demo level complete!!!");
+		document.getElementById('fruits2').textContent = totalscore;
+		gameEnd();
 	}
 	
 	//animate and check collison with rocks
@@ -550,6 +551,7 @@ function animate() {
 			// Decrease the score and health
 			if(playerMask){
 				playerMask = 0;
+				mask.position.set(0 -2, 0);
 			}else{
 				health--;
 				if(health == 0){
@@ -807,7 +809,6 @@ function playRunAnimation(){
 	let step_time= 500;
 
 	let leg_up_max_angle = 35;
-	let arm_max_angle = 45;
 	
 	playerBones.rightUpperLeg.rotation.z =rad(0);	
 
@@ -880,3 +881,10 @@ function gameOver(){
 	document.getElementById("score_box").hidden = true;
 	backgroundSound.pause();
 }
+function gameEnd(){
+	gameOverFlag= 1;
+	document.getElementById("game_over1").hidden = false;
+	document.getElementById("score_box").hidden = true;
+	backgroundSound.pause();
+}
+
