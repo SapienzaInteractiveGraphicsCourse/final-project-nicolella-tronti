@@ -55,6 +55,21 @@
             top: 370px;
             left: 500px;
         }
+        #gameOverh1{
+            position: absolute;
+            top: 100px;
+            left: 350px;
+        }
+        #gameOverP{
+            position: absolute;
+            top: 200px;
+            left: 400px;
+        }
+        #fruits2{
+            position: absolute;
+            top: 105px;
+            left: 970px;
+        }
     </style>
 </head>
 <body>
@@ -94,8 +109,8 @@
         <p>Press <b>Esc</b> to resume.</p>
     </div>
     <div id="game_over" hidden>
-        <h1>GAME OVER</h1>
-        <p>Press <b>F5</b> or <b>reload the page</b> to restart the game.</p>
+        <h1 id="gameOverh1">GAME OVER. Your Score is: <h2 id="fruits2"> 0 </h2> </h1>
+        <p id="gameOverP">Press <b>F5</b> or <b>reload the page</b> to restart the game.</p>
     </div>
     <div id="score_box" hidden>
         <div class="Row">

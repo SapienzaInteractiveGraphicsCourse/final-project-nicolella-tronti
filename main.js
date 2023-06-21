@@ -41,6 +41,7 @@ var enemies,collectibles, akuboxes, spikes;
 var score;
 var renderer;
 var scoreElement;
+var gameOverFlag =0;
 //Jump
 var isJumping = false;
 var jumpHeight = 2;
@@ -63,12 +64,20 @@ loadModels();
 loadSounds();
 
 var blink = document.getElementById("blink");
+var blink2 = document.getElementById("gameOverP");
 setInterval(function () {
   if (blink.style.opacity == 0) {
     blink.style.opacity = 1;
   } else {
     blink.style.opacity = 0;
   }
+}, 1000);
+setInterval(function() {
+	if(blink2.style.opacity == 0){
+		blink2.style.opacity = 1;
+	} else {
+		blink2.style.opacity = 0;
+	}
 }, 1000);
 function loadModels() {
 
@@ -401,8 +410,9 @@ function checkCollision(object1, object2){
 // Game loop
 function animate() {
 	requestAnimationFrame(animate);
-	if(keyboard['Enter']) startGame();
+	if(keyboard['Enter'] && gamePause) startGame();
 	else{
+	if(!gameOverFlag){
 	if(playerMask) mask.position.set(player.position.x -1, player.position.y+1 , player.position.z);
 	if (keyboard['KeyW']) {
 		player.position.z += 0.1;
@@ -448,6 +458,7 @@ function animate() {
 		}
 	}
 	}
+}
 	// Update camera position
 	camera.position.copy(player.position);
 	camera.position.y += 2;
@@ -473,7 +484,8 @@ function animate() {
 				health--;
 				if(health == 0){
 				//implement game over logic
-					alert("game over");
+					document.getElementById('fruits2').textContent = score;
+					gameOver();
 				}
 			}		
 
@@ -593,7 +605,7 @@ function animate() {
 
 	for (let i = 0; i < collectibles.length; i++) {
 		const collectible = collectibles[i];
-		collectible.rotation.y += 0.05;
+		if(!gameOverFlag) collectible.rotation.y += 0.05;
 		if (checkCollision(player, collectible)) {
 			// Collectible logic
 			playWumpaSound();
@@ -755,4 +767,10 @@ function startGame(){
 	document.getElementById("main_menu").hidden = true;
 	document.getElementById("score_box").hidden = false;
 	gamePause=0;
+}
+function gameOver(){
+	gameOverFlag= 1;
+	document.getElementById("game_over").hidden = false;
+	document.getElementById("score_box").hidden = true;
+	backgroundSound.pause();
 }
