@@ -202,7 +202,7 @@ function init(){
 	player.name = "crash";
     var body = models.crash.gltf.getObjectByName('Sketchfab_model');
     body.scale.set(2,2, 2);
-	player.position.set(0, 0, 4);
+	player.position.set(0, 0.1, 4);
     player.add(body);
     initPlayerSkeleton();
     scene.add(player);
@@ -452,6 +452,9 @@ function checkCollision(object1, object2){
 // Game loop
 function animate() {
 	requestAnimationFrame(animate);
+	console.log(playerBones.leftLowerLeg.rotation);
+	console.log(playerBones.rightLowerLeg.rotation);
+	
 	
 	sound3.setVolume(player.position.z/1000);
 	
@@ -817,66 +820,95 @@ function playRunAnimation(){
 
 	let step_time= 500;
 
-	let leg_up_max_angle = 35;
+	let max_angle = 60;
 	
-	playerBones.rightUpperLeg.rotation.z =rad(0);	
-
+	playerBones.rightUpperLeg.rotation.z -=rad(0.7*max_angle);
+	playerBones.leftUpperLeg.rotation.z -=rad(max_angle);
+		
+	
 	playerBones.leftLowerArm.rotation.z = rad(-45);
 	playerBones.rightLowerArm.rotation.z = rad(45);
 
-	var leg_up_start = {z: 0};
-	var leg_up_tween_start = new TWEEN.Tween(leg_up_start)
-	.to({z:-leg_up_max_angle}, step_time)
+	
+	var left_up_leg_tween = new TWEEN.Tween(playerBones.leftUpperLeg.rotation)
+	.to({z:playerBones.leftUpperLeg.rotation.z + rad(1.8*max_angle) }, step_time)
 	.easing(TWEEN.Easing.Quadratic.Out)
-	.onUpdate(
-		() => {
-			playerBones.leftUpperLeg.rotation.z = rad(180 - leg_up_start.z);
-			playerBones.rightUpperLeg.rotation.z = rad(50 - leg_up_start.z);
-			playerBones.leftUpperArm.rotation.z = rad(-50 - leg_up_start.z);
-			playerBones.rightUpperArm.rotation.z = rad(50 - leg_up_start.z);
-		}
-	);
-
-	var leg_up_end = {z: -leg_up_max_angle};
-	var leg_up_tween_end = new TWEEN.Tween(leg_up_end)
-	.to({z:45+leg_up_max_angle},step_time)
+	.repeat(Infinity)
+	.yoyo(true);
+	
+	var left_low_leg_tween = new TWEEN.Tween(playerBones.leftLowerLeg.rotation)
+	.to({z:playerBones.leftLowerLeg.rotation.z - rad(0.7*max_angle) }, step_time)
 	.easing(TWEEN.Easing.Quadratic.Out)
-	.onUpdate(
-		() => {
-			playerBones.leftUpperLeg.rotation.z = rad(180 - leg_up_end.z);
-			playerBones.rightUpperLeg.rotation.z = rad(50 - leg_up_end.z);
-			playerBones.leftUpperArm.rotation.z = rad(-50 - leg_up_end.z);
-			playerBones.rightUpperArm.rotation.z = rad(50 - leg_up_end.z);
-		}
-	);
-	var leg2_up_end = {z: 45+ leg_up_max_angle};
-	var leg2_up_tween_end = new TWEEN.Tween(leg2_up_end)
-	.to({z:0},step_time)
+	.repeat(Infinity)
+	.yoyo(true);
+	
+	
+	
+	
+	var right_up_leg_tween = new TWEEN.Tween(playerBones.rightUpperLeg.rotation)
+	.to({z:rad(0.5*max_angle)},step_time)
 	.easing(TWEEN.Easing.Quadratic.Out)
-	.onUpdate(
-		() => {
-			playerBones.leftUpperLeg.rotation.z = rad(180 - leg2_up_end.z);
-			playerBones.rightUpperLeg.rotation.z = rad(50 - leg2_up_end.z);
-			playerBones.leftUpperArm.rotation.z = rad(-50 - leg2_up_end.z);
-			playerBones.rightUpperArm.rotation.z = rad(50 - leg2_up_end.z);
-		}
-	);
+	.repeat(Infinity)
+	.yoyo(true);
+	
+	
+	var right_low_leg_tween = new TWEEN.Tween(playerBones.rightLowerLeg.rotation)
+	.to({z:playerBones.rightLowerLeg.rotation.z + rad(0.3*max_angle) }, step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.repeat(Infinity)
+	.yoyo(true);
+	
+	playerBones.leftUpperArm.rotation.z-=rad(max_angle);
+	playerBones.rightUpperArm.rotation.z-=rad(max_angle/2);
+	
+	var left_arm_tween = new TWEEN.Tween(playerBones.leftUpperArm.rotation)
+	.to({z: playerBones.leftUpperArm.rotation.z +rad(1.5*max_angle) },step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.repeat(Infinity)
+	.yoyo(true);
+	
+	var right_arm_tween = new TWEEN.Tween(playerBones.rightUpperArm.rotation)
+	.to({z: playerBones.rightUpperArm.rotation.z + rad(max_angle) },step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.repeat(Infinity)
+	.yoyo(true);
+	
+	var left_low_arm_tween = new TWEEN.Tween(playerBones.leftLowerArm.rotation)
+	.to({z: playerBones.leftLowerArm.rotation.z + rad(max_angle/2) },step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.repeat(Infinity)
+	.yoyo(true);
+	
+	var right_low_arm_tween = new TWEEN.Tween(playerBones.rightLowerArm.rotation)
+	.to({z: playerBones.rightLowerArm.rotation.z + rad(max_angle) },step_time)
+	.easing(TWEEN.Easing.Quadratic.Out)
+	.repeat(Infinity)
+	.yoyo(true);
+	
+	left_up_leg_tween.start();
+	right_up_leg_tween.start();
+	left_low_leg_tween.start();
+	right_low_leg_tween.start();
+	left_arm_tween.start();
+	right_arm_tween.start();
+	left_low_arm_tween.start();
+	right_low_arm_tween.start();
 
-
-	leg_up_tween_start.onComplete(()=>{leg_up_tween_end.start();});
-	leg_up_tween_end.onComplete(()=>{leg2_up_tween_end.start();});
-	leg2_up_tween_end.onComplete(()=>{leg_up_tween_start.start();});
-
-	leg_up_tween_start.start();
-	leg_up_tween_end.start();
-	leg2_up_tween_end.start();
-
-	runTweens.push(leg_up_tween_start);
-	runTweens.push(leg_up_tween_end);
-	runTweens.push(leg2_up_tween_end);
+	runTweens.push(left_up_leg_tween);
+	runTweens.push(right_up_leg_tween);
+	runTweens.push(left_low_leg_tween);
+	runTweens.push(right_low_leg_tween);
+	runTweens.push(left_arm_tween);
+	runTweens.push(right_arm_tween);
+	runTweens.push(right_low_arm_tween);
+	runTweens.push(left_low_arm_tween);
+	
+	
 }
 
 function playJumpAnimation(){
+	playerBones.leftLowerArm.rotation.z = rad(-45);
+	playerBones.rightLowerArm.rotation.z = rad(45);
 	playerBones.leftUpperArm.rotation.y = rad(-40);
 	playerBones.rightUpperArm.rotation.y = rad(40);
 	playerBones.leftUpperArm.rotation.z = rad(-90);
